@@ -2,4 +2,18 @@
   margin: 0;
   padding: 0;
 }
+.new-image {
+  margin-right: 0.5em;
+  margin-top: 0.5em;
+}
+.image-card {
+  border: 1px red solid;
+}
+.image-card img {
+  max-width: 300px;
+  max-height: 300px;
+}
+.image-card a {
+  margin-right: 1em;
+}
 /*# sourceMappingURL=image-organizer.1.0.0.css.map */
