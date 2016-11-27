@@ -4,7 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "build:css": "npm run clean:css && lessc --source-map public/less/index.less public/$npm_package_name.$npm_package_version.css",
+    "watch:css": "npm run build:css && chokidar 'public/less/**/*.less' -c 'npm run build:css'",
+    "clean:css": "rm -f public/$npm_package_name.$npm_package_version.css public/$npm_package_name.$npm_package_version.css.map"
   },
   "repository": {
     "type": "git",
@@ -19,9 +22,13 @@
   "dependencies": {
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
+    "chokidar": "^1.6.1",
     "express": "^4.14.0",
     "mocha": "^3.2.0",
     "mongodb": "^2.2.11",
     "mongoose": "^4.7.0"
+  },
+  "devDependencies": {
+    "less": "^2.7.1"
   }
 }
