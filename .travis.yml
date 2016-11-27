@@ -1,0 +1,17 @@
+language: node_js
+node_js: node
+services:
+- mongodb
+addons:
+  apt:
+    sources:
+    - mongodb-3.2-precise
+    packages:
+    - mongodb-org-server
+deploy:
+  provider: heroku
+  api_key:
+    secure: OSQBGJIx8mmQMG08nQ0Cm99XIPbx3f/oFONhIToH5ZGI867mP3bsX7U/og3bpz4g946jXWh97rA3hNZ9myjLYiwXEbz103sbetVi4cui2cpA/tGKzQRwBIBwoPfdKjNsDv3PiVRiJxIMs8UvwD0Lcey5GTB0blxCOk2A8SYPYCcw8lY+l8O7O2oK3fAgs5/5skc+iIr4b+VJIifNhwMGafuuy3nBrLLlB1M1XU/ESxyHzji2qsXtkEVQRTg3iWz5CjbhBYgmR4RFrGIRa1AhV03DROS7d1r5vdyoyLqgpNOnaOTjfliKdfEtn0OZidVPzQJ/tO4DiQYMnZqRlnrNwhx3BD3rUy3vxxdY5Ixvk8fwdwx3hDfJwpqwI2hOGD/j6SYs/8R4VdCGenJtu4+OwuPf1UfliaSt1E9trHIlP913ZYpv9QFZKqSxSKnFamoFITJwjX5yZclZ97uOy2055KujUyFBFECanmv9zN0pcds3ruXUax3T5g//k+OuY44iFC+R6ncOyF3WS9V8ETrRCrxE2DuA/CiOsh7rJrg10VwoVrb52ZpaR8cnnLftHOfMhsdzRqJnndSu868EKXcG/RHWV2/icRf3kdQhxAQzAOX+fHDa8S6S8ANMGgsDECmiWg/arFDXKVCKoBeVOMJP7fStLwJqfwvl7XMra6yvLLo=
+  app: still-temple-63836
+  on:
+    repo: amcavinue/image-organizer
