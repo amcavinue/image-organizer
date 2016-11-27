@@ -4,12 +4,13 @@
 var express = require('express');
 var util = require('util');
 var mongoose = require('mongoose');
+var path = require('path');
 
 var config = require('./config');
 
 var app = express();
 
-app.use(express.static('public'));
+app.use(express.static('public'));  // Serve the public folder.
 
 app.listen(process.env.PORT || 8080);
 exports.app = app;
@@ -31,3 +32,11 @@ var runServer = function(callback) {
         });
     });
 };
+
+
+/**
+ * Routes
+ */
+ app.get('/:imageId/edit', function(req, res) {
+     res.sendFile(path.join(__dirname + '/public/edit.html'));
+});
