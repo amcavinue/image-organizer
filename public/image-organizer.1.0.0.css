@@ -19,6 +19,7 @@ body {
 }
 #filters fieldset {
   margin-bottom: 1em;
+  display: none;
 }
 #filters .tag-list {
   width: 100%;
@@ -36,13 +37,24 @@ body {
   width: 0;
 }
 #filters .tag-list li .check-label {
-  padding: 0.25em 0.5em;
+  padding: 0.25em 1em;
   border-radius: 0.5em;
   font-weight: 500;
 }
 #filters .tag-list li .checkbox:checked + .check-label {
   background-color: #ddd;
   color: #444;
+}
+#filters #toggle-arrow {
+  width: 3em;
+  height: 3em;
+  display: block;
+  margin: 0 auto;
+  opacity: 0.5;
+  cursor: pointer;
+}
+#filters #toggle-arrow:hover {
+  opacity: 1;
 }
 .image-card {
   padding: 1em;

@@ -25,6 +25,7 @@ body {
     
     fieldset {
         margin-bottom: 1em;
+        display: none;
     }
     
     .tag-list {
@@ -44,7 +45,7 @@ body {
             }
             
             .check-label {
-                padding: 0.25em 0.5em;
+                padding: 0.25em 1em;
                 border-radius: 0.5em;
                 font-weight: 500;
             }
@@ -53,6 +54,19 @@ body {
                 background-color: #ddd;
                 color: #444;
             }
+        }
+    }
+    
+    #toggle-arrow {
+            width: 3em;
+            height: 3em;
+            display: block;
+            margin: 0 auto;
+            opacity: 0.5;
+            cursor: pointer;
+        
+        &:hover {
+            opacity: 1;
         }
     }
 }

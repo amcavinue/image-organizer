@@ -38,7 +38,100 @@ $(function() {
         },
     ];
     
-    var tags = ['snow', 'trees', 'nature', 'castle', 'monet'];
+    var tags = ['snow', 'trees', 'nature', 'castle', 'monet', 'abc', 'def', 'ghi', 'jkl', 'mno', 'pqr', 'stu', 'vwx', 'yza', 'bcd', 'efg', 'hij', 'klm', 'nop'];
+    
+    var imageTagAssociative = [
+        {
+          imageId: '0',
+          imageName: '23.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '0',
+          imageName: '23.jpg',
+          tag: 'trees'
+        },
+        {
+          imageId: '0',
+          imageName: '23.jpg',
+          tag: 'nature'
+        },
+        {
+          imageId: '1',
+          imageName: 'ice_castle550.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '1',
+          imageName: 'ice_castle550.jpg',
+          tag: 'castle'
+        },
+        {
+          imageId: '1',
+          imageName: 'ice_castle550.jpg',
+          tag: 'nature'
+        },
+        {
+          imageId: '2',
+          imageName: 'monet04.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '2',
+          imageName: 'monet04.jpg',
+          tag: 'trees'
+        },
+        {
+          imageId: '2',
+          imageName: 'monet04.jpg',
+          tag: 'monet'
+        },
+        {
+          imageId: '3',
+          imageName: '23.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '3',
+          imageName: '23.jpg',
+          tag: 'trees'
+        },
+        {
+          imageId: '3',
+          imageName: '23.jpg',
+          tag: 'nature'
+        },
+        {
+          imageId: '4',
+          imageName: 'ice_castle550.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '4',
+          imageName: 'ice_castle550.jpg',
+          tag: 'castle'
+        },
+        {
+          imageId: '4',
+          imageName: 'ice_castle550.jpg',
+          tag: 'nature'
+        },
+        {
+          imageId: '5',
+          imageName: 'monet04.jpg',
+          tag: 'snow'
+        },
+        {
+          imageId: '5',
+          imageName: 'monet04.jpg',
+          tag: 'trees'
+        },
+        {
+          imageId: '5',
+          imageName: 'monet04.jpg',
+          tag: 'monet'
+        }
+    ];
     
     renderCards(imageData);
     
@@ -49,6 +142,20 @@ $(function() {
         $('#img-modal').attr("src", 'images/' + $(this).data('name'));
         
         $('#imgModal').modal('show');
+    });
+    
+    // Toggle the filters form.
+    $('#toggle-arrow').on('click', function() {
+        if (!$(this).hasClass('up-arrow')) {
+            $(this).attr('src', 'assets/up-arrow.png');
+            $(this).addClass('up-arrow');
+            
+        } else  {
+            $(this).attr('src', 'assets/down-arrow.png');
+            $(this).removeClass('up-arrow')
+        }
+        
+        $('#filters-fieldset').slideToggle(400);
     });
 });
 

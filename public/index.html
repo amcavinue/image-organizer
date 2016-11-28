@@ -22,8 +22,8 @@
     
     <div class="container" id="filters">
         <form action="" method="">
-            <fieldset>
-              <legend>Filters</legend>
+            <legend>Filters</legend>
+            <fieldset id="filters-fieldset">
               <div>
                   <label for="name">Image Contains</label>
                   <input type="text" id="name" name="user_name" />
@@ -86,9 +86,9 @@
                         
                     </ul>
               </div>
+              <input class="btn btn-primary" type="submit" value="Filter" name="submit" />
             </fieldset>
-        
-            <input class="btn btn-primary" type="submit" value="Filter" name="submit" />
+            <img id="toggle-arrow" class="" src="assets/down-arrow.png"/>
         </form>
     </div>
     
