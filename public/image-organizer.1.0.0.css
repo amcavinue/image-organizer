@@ -2,18 +2,39 @@
   margin: 0;
   padding: 0;
 }
+body {
+  line-height: 1.75em;
+}
 .new-image {
   margin-right: 0.5em;
   margin-top: 0.5em;
 }
 .image-card {
-  border: 1px red solid;
+  padding: 1em;
+  text-align: center;
 }
-.image-card img {
+.image-card .card-container {
+  border: 1px #333 solid;
+  padding: 1em;
+}
+.image-card .card-container .img-container {
+  height: 300px;
+  cursor: pointer;
+}
+.image-card .card-container .img-container .img-helper {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+.image-card .card-container .img-container img {
   max-width: 300px;
   max-height: 300px;
+  vertical-align: middle;
 }
-.image-card a {
+.image-card .card-container a {
   margin-right: 1em;
+}
+.modal-body {
+  text-align: center;
 }
 /*# sourceMappingURL=image-organizer.1.0.0.css.map */

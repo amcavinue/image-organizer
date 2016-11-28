@@ -3,20 +3,46 @@
     padding: 0;
 }
 
+body {
+    line-height: 1.75em;
+}
+
 .new-image {
     margin-right: 0.5em;
     margin-top: 0.5em;
 }
 
 .image-card {
-    border: 1px red solid;
+    padding: 1em;
+    text-align: center;
     
-    img {
-        max-width: 300px;
-        max-height: 300px;
+    .card-container {
+        border: 1px #333 solid;
+        padding: 1em;
+        
+        .img-container {
+            height: 300px;
+            cursor: pointer;
+            
+            .img-helper {
+                display: inline-block;
+                height: 100%;
+                vertical-align: middle;
+            }
+            
+            img {
+                max-width: 300px;
+                max-height: 300px;
+                vertical-align: middle;
+            }
+        }
+        
+        a {
+            margin-right: 1em;
+        }
     }
-    
-    a {
-        margin-right: 1em;
-    }
+}
+
+.modal-body {
+    text-align: center;
 }

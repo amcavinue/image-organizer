@@ -39,6 +39,15 @@ $(function() {
     ];
     
     renderCards(imageData);
+    
+    // Put a modal listener on all the images.
+    $('.container').on('click', '.img-container', function() {
+        $('#img-title').text($(this).data('name'));
+        $('#img-description').text($(this).data('description'));
+        $('#img-modal').attr("src", 'images/' + $(this).data('name'));
+        
+        $('#imgModal').modal('show');
+    });
 });
 
 function renderCards(imageData) {
@@ -65,11 +74,16 @@ function renderCards(imageData) {
 
 function renderCard(imgData) {
     return '<div class="col-xs-12 col-md-4 image-card">' + 
-                '<img src="images/' + imgData.name + '"></img>' +
-                '<br />' +
-                '<span>' + imgData.description + '</span>' +
-                '<br />' +
-                '<a href="#">Delete</a>' + 
-                '<a href="#">Edit</a>' +
+                '<div class="card-container">' +
+                    '<div class="img-container" data-name="' + imgData.name + '" data-description="' + imgData.description + '">' +
+                        '<span class="img-helper"></span>' +
+                        '<img src="images/' + imgData.name + '"></img>' +
+                    '</div>' +
+                    '<br />' +
+                    '<span>' + imgData.description + '</span>' +
+                    '<br />' +
+                    '<a href="#"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</a>' +
+                    '<a href="#"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
+                '</div>' +
             '</div>';
 }
