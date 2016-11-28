@@ -134,6 +134,7 @@ $(function() {
     ];
     
     renderCards(imageData);
+    renderTags(tags);
     
     // Put a modal listener on all the images.
     $('#main-cards').on('click', '.img-container', function() {
@@ -156,6 +157,12 @@ $(function() {
         }
         
         $('#filters-fieldset').slideToggle(400);
+    });
+    
+    // Watch the filter form button.
+    $('#filter-form').submit(function(e) {
+       e.preventDefault();
+       
     });
 });
 
@@ -185,4 +192,17 @@ function renderCard(imgData) {
                     '<a href="#"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
                 '</div>' +
             '</div>';
+}
+
+function renderTags(tags) {
+    var html = '';
+    
+    for (var i = 0; i < tags.length; i++) {
+        html += '<li>' +
+                    '<input id="check' + i + '" type="checkbox" class="checkbox" value="first_checkbox">' +
+                    '<label class="check-label" for="check' + i + '">' + tags[i] + '</label>' +
+                '</li>';
+    }
+    
+    $('#tag-list').empty().append(html);
 }
