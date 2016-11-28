@@ -38,10 +38,12 @@ $(function() {
         },
     ];
     
+    var tags = ['snow', 'trees', 'nature', 'castle', 'monet'];
+    
     renderCards(imageData);
     
     // Put a modal listener on all the images.
-    $('.container').on('click', '.img-container', function() {
+    $('#main-cards').on('click', '.img-container', function() {
         $('#img-title').text($(this).data('name'));
         $('#img-description').text($(this).data('description'));
         $('#img-modal').attr("src", 'images/' + $(this).data('name'));
@@ -51,29 +53,19 @@ $(function() {
 });
 
 function renderCards(imageData) {
-    var html = '',
-        rows = 0;
+    var html = '<div class="row">';
     
     for (var i = 0; i < imageData.length; i++) {
-        // Place a new row before every third image.
-        if (i % 3 === 0) {
-            html += '<div class="row">';
-            rows += 1;
-        }
-        
         html += renderCard(imageData[i]);
-        
-        // Close the div after every third image.
-        if ((i + 1) % 3 === 0) {
-           html += '</div>';
-        }
     }
     
-    $('.container').empty().append(html);
+    html += '</div>';
+    
+    $('#main-cards').empty().append(html);
 }
 
 function renderCard(imgData) {
-    return '<div class="col-xs-12 col-md-4 image-card">' + 
+    return '<div class="col-xs-12 col-md-6 col-lg-4 image-card">' + 
                 '<div class="card-container">' +
                     '<div class="img-container" data-name="' + imgData.name + '" data-description="' + imgData.description + '">' +
                         '<span class="img-helper"></span>' +
