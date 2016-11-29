@@ -42,92 +42,92 @@ $(function() {
     
     var imageTagAssociative = [
         {
-          imageId: '0',
+          imageId: 0,
           imageName: '23.jpg',
           tag: 'snow'
         },
         {
-          imageId: '0',
+          imageId: 0,
           imageName: '23.jpg',
           tag: 'trees'
         },
         {
-          imageId: '0',
+          imageId: 0,
           imageName: '23.jpg',
           tag: 'nature'
         },
         {
-          imageId: '1',
+          imageId: 1,
           imageName: 'ice_castle550.jpg',
           tag: 'snow'
         },
         {
-          imageId: '1',
+          imageId: 1,
           imageName: 'ice_castle550.jpg',
           tag: 'castle'
         },
         {
-          imageId: '1',
+          imageId: 1,
           imageName: 'ice_castle550.jpg',
           tag: 'nature'
         },
         {
-          imageId: '2',
+          imageId: 2,
           imageName: 'monet04.jpg',
           tag: 'snow'
         },
         {
-          imageId: '2',
+          imageId: 2,
           imageName: 'monet04.jpg',
           tag: 'trees'
         },
         {
-          imageId: '2',
+          imageId: 2,
           imageName: 'monet04.jpg',
           tag: 'monet'
         },
         {
-          imageId: '3',
+          imageId: 3,
           imageName: '23.jpg',
           tag: 'snow'
         },
         {
-          imageId: '3',
+          imageId: 3,
           imageName: '23.jpg',
           tag: 'trees'
         },
         {
-          imageId: '3',
+          imageId: 3,
           imageName: '23.jpg',
           tag: 'nature'
         },
         {
-          imageId: '4',
+          imageId: 4,
           imageName: 'ice_castle550.jpg',
           tag: 'snow'
         },
         {
-          imageId: '4',
+          imageId: 4,
           imageName: 'ice_castle550.jpg',
           tag: 'castle'
         },
         {
-          imageId: '4',
+          imageId: 4,
           imageName: 'ice_castle550.jpg',
           tag: 'nature'
         },
         {
-          imageId: '5',
+          imageId: 5,
           imageName: 'monet04.jpg',
           tag: 'snow'
         },
         {
-          imageId: '5',
+          imageId: 5,
           imageName: 'monet04.jpg',
           tag: 'trees'
         },
         {
-          imageId: '5',
+          imageId: 5,
           imageName: 'monet04.jpg',
           tag: 'monet'
         }
@@ -163,6 +163,27 @@ $(function() {
     $('#filter-form').submit(function(e) {
        e.preventDefault();
        
+       var inputs = $( this ).serializeArray(); 
+       var contains = (inputs[0]['name'] === 'contains') ? inputs[0]['value'] : null;  // If the first object is the 'contains' input (it should be), return the value of the input.
+       inputs.splice(0, 1);
+       
+       var formTags = [];
+       
+       // Get just the tag names from the inputs.
+       for (var i = 0; i < inputs.length; i++) {
+           formTags[i] = inputs[i]['name'];
+       }
+       
+       var results = [];
+       results = results.concat(findKeywords(contains, formTags, imageData));
+       results = results.concat(findTags(formTags, imageTagAssociative));
+       
+       // Remove duplicates from the results.
+       var results = results.filter(function(elem, index, self) {
+           return index == self.indexOf(elem);
+       });
+        
+       renderSelectCards(results, imageData);
     });
 });
 
@@ -174,7 +195,17 @@ function renderCards(imageData) {
     }
     
     html += '</div>';
+    $('#main-cards').empty().append(html);
+}
+
+function renderSelectCards(indices, imageData) {
+    var html = '<div class="row">';
     
+    for (var i = 0; i < indices.length; i++) {
+        html += renderCard(imageData[indices[i]]);
+    }
+    
+    html += '</div>';
     $('#main-cards').empty().append(html);
 }
 
@@ -199,10 +230,60 @@ function renderTags(tags) {
     
     for (var i = 0; i < tags.length; i++) {
         html += '<li>' +
-                    '<input id="' + tags[i] + '" type="checkbox" class="checkbox" value="first_checkbox">' +
+                    '<input id="' + tags[i] + '" type="checkbox" class="checkbox" name="' + tags[i] + '">' +
                     '<label class="check-label" for="' + tags[i] + '">' + tags[i] + '</label>' +
                 '</li>';
     }
     
     $('#tag-list').empty().append(html);
+}
+
+function findKeywords(contains, tags, imageData) {
+    // Sanitize the input.
+    contains = contains.trim().toLowerCase().split(/[^a-zA-Z0-9']+/ig).filter(function(el, i, self) { return (el.length !== 0) && (i === self.indexOf(el)); });
+    
+    // Remove any duplicate tags from contains.
+    contains = contains.filter(function(val) {
+        return tags.indexOf(val) == -1;
+    });
+    
+    // Return any images that match any of the keywords in any of their properties.
+    // http://stackoverflow.com/questions/8517089/js-search-in-object-values
+    var results = [];
+    
+    // Look in each image object.
+    for(var i = 0; i < imageData.length; i++) {
+        
+        // Look in every property of that image.
+        imageLoop:
+        for(var key in imageData[i]) {
+            
+            // For each property, look for all the keywords.
+            for (var j = 0; j < contains.length; j++) {
+                
+                // If the keyword is in the property add the index to the results
+                // and go to the next image (don't need to check if it's already returned).
+                if(String(imageData[i][key]).toLowerCase().indexOf(contains[j]) !== -1) {
+                    results.push(imageData[i].id);
+                    break imageLoop;
+                }
+            }
+        }
+    }
+    
+    return results;
+}
+
+function findTags(tags, imageTagAssociative) {
+    var results = [];
+    
+    for (var i = 0; i < imageTagAssociative.length; i++) {
+        for (var j = 0; j < tags.length; j++) {
+            if (imageTagAssociative[i].tag === tags[j]) {
+                results.push(imageTagAssociative[i].imageId);
+            }
+        }
+    }
+    
+    return results;
 }
