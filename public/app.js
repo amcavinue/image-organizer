@@ -199,8 +199,8 @@ function renderTags(tags) {
     
     for (var i = 0; i < tags.length; i++) {
         html += '<li>' +
-                    '<input id="check' + i + '" type="checkbox" class="checkbox" value="first_checkbox">' +
-                    '<label class="check-label" for="check' + i + '">' + tags[i] + '</label>' +
+                    '<input id="' + tags[i] + '" type="checkbox" class="checkbox" value="first_checkbox">' +
+                    '<label class="check-label" for="' + tags[i] + '">' + tags[i] + '</label>' +
                 '</li>';
     }
     
