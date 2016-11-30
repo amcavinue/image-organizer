@@ -11,6 +11,8 @@ var config = require('./config');
 var app = express();
 
 app.use(express.static('public'));  // Serve the public folder.
+app.use('/scripts', express.static(__dirname + '/node_modules/')); // Serve the node_modules folder.
+
 
 app.listen(process.env.PORT || 8080);
 exports.app = app;

@@ -145,6 +145,12 @@ $(function() {
         $('#imgModal').modal('show');
     });
     
+    // Put listener on new image button.
+    
+    // Put listeners on all the edit buttons.
+    
+    // Put listeners on all delete buttons.
+    
     // Toggle the filters form.
     $('#toggle-arrow').on('click', function() {
         if (!$(this).hasClass('up-arrow')) {
@@ -169,7 +175,7 @@ $(function() {
        
        var formTags = [];
        
-       // Get just the tag names from the inputs.
+       // Extract just the tag names from the inputs.
        for (var i = 0; i < inputs.length; i++) {
            formTags[i] = inputs[i]['name'];
        }
@@ -262,7 +268,7 @@ function findKeywords(contains, tags, imageData) {
             for (var j = 0; j < contains.length; j++) {
                 
                 // If the keyword is in the property add the index to the results
-                // and go to the next image (don't need to check if it's already returned).
+                // and go to the next image.
                 if(String(imageData[i][key]).toLowerCase().indexOf(contains[j]) !== -1) {
                     results.push(imageData[i].id);
                     break imageLoop;

@@ -20,13 +20,16 @@
   },
   "homepage": "https://github.com/amcavinue/image-organizer#readme",
   "dependencies": {
+    "bootstrap": "^3.3.7",
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
     "chokidar": "^1.6.1",
     "express": "^4.14.0",
+    "jquery": "^3.1.1",
     "mocha": "^3.2.0",
     "mongodb": "^2.2.11",
-    "mongoose": "^4.7.0"
+    "mongoose": "^4.7.0",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "less": "^2.7.1"
