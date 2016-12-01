@@ -144,9 +144,12 @@ $(function() {
         url: "/", 
         acceptedFiles: 'image/*',
         uploadMultiple: false,
-        dictDefaultMessage: 'Drop images here or click here to upload.',
+        dictDefaultMessage: 'Drop images here or click to upload.',
         init: function() {
             this.on("success", function(file, response) {
+                // TODO: Test/handle response, and place image in here.
+                /*$('#img-description').text();
+                $('#img-modal').attr("src", 'images/' + );*/
                 // console.log(response);
             }).on("error", function(file, errorMessage) {
                 // console.log('There was an upload error');
@@ -163,6 +166,23 @@ $(function() {
     });
     
     // Put listener on the new image button.
+    $('#new-image').click(function(e) {
+        e.preventDefault();
+        var cardId = imageData.length; 
+        $('#modal-edit-name').text('New Image');
+        $('#uploaded-image-name').text('');
+        $('#uploaded-image').attr("src", '');
+        $('#image-description').val('');
+        
+        // Clear the dropzone and change the upload destination.
+        newImageUploader.removeAllFiles();
+        newImageUploader.options.url = '/' + cardId + '/image';
+        
+        // Uncheck all the checkboxes.
+        $('#tag-list-edit input:checkbox').prop('checked', false);
+        
+        $('#modal-edit').modal('show');
+    });
     
     // Put listeners on all the edit buttons.
     $('#main-cards').on('click', '.edit-card', function(e) {
