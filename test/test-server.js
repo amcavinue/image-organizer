@@ -20,13 +20,4 @@ describe('Image organizer', function() {
                 done();
             });
     });
-    
-    it('should show the edit page', function(done) {
-        chai.request(app)
-            .get('/1/edit')
-            .end(function(err, res) {
-                res.should.have.status(200);
-                done();
-            });
-    });
 });
