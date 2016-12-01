@@ -1,3 +1,6 @@
+// Disable dropzone auto discover in order to set custom element later on.
+Dropzone.autoDiscover = false;
+
 $(function() {
     var imageData = [
         {
@@ -136,20 +139,59 @@ $(function() {
     renderCards(imageData);
     renderTags(tags);
     
+    // Instantiate the dropzone.
+    var newImageUploader = new Dropzone("#new-image-uploader", { 
+        url: "/", 
+        acceptedFiles: 'image/*',
+        uploadMultiple: false,
+        dictDefaultMessage: 'Drop images here or click here to upload.'
+    });
+    
     // Put a modal listener on all the images.
     $('#main-cards').on('click', '.img-container', function() {
         $('#img-title').text($(this).data('name'));
         $('#img-description').text($(this).data('description'));
         $('#img-modal').attr("src", 'images/' + $(this).data('name'));
-        
-        $('#imgModal').modal('show');
+        $('#modal-image').modal('show');
     });
     
-    // Put listener on new image button.
+    // Put listener on the new image button.
     
     // Put listeners on all the edit buttons.
+    $('#main-cards').on('click', '.edit-card', function(e) {
+        e.preventDefault();
+        var cardId = $(this).data('id');
+        $('#modal-edit-name').text('Edit ' + imageData[cardId].name);
+        $('#uploaded-image-name').text(imageData[cardId].name);
+        $('#uploaded-image').attr("src", 'images/' + imageData[cardId].name);
+        $('#image-description').val(imageData[cardId].description);
+        
+        // Clear the dropzone and change the upload destination.
+        newImageUploader.removeAllFiles();
+        newImageUploader.options.url = '/' + cardId + '/image';
+        
+        // Uncheck all the checkboxes.
+        $('#tag-list-edit input:checkbox').prop('checked', false);
+        
+        for (var i = 0; i < imageData[cardId].tags.length; i++) {
+            // Check the tags it already has.
+            $('#' + imageData[cardId].tags[i] + '-1').prop('checked', 'checked');
+        }
+        
+        $('#modal-edit').modal('show');
+    });
+    
+    // Watch the edit form button.
+    $('#edit-form').submit(function(e) {
+        e.preventDefault(); 
+        $('#modal-edit').modal('hide');
+    });
     
     // Put listeners on all delete buttons.
+    $('#main-cards').on('click', '.delete-card', function(e) {
+        e.preventDefault();
+        // TODO: This.
+    });
     
     // Toggle the filters form.
     $('#toggle-arrow').on('click', function() {
@@ -188,8 +230,12 @@ $(function() {
        var results = results.filter(function(elem, index, self) {
            return index == self.indexOf(elem);
        });
-        
-       renderSelectCards(results, imageData);
+
+       if (results.length !== 0) {
+           renderSelectCards(results, imageData);
+       } else {
+           renderCards(imageData);
+       }
     });
 });
 
@@ -225,23 +271,32 @@ function renderCard(imgData) {
                     '<br />' +
                     '<span>' + imgData.description + '</span>' +
                     '<br />' +
-                    '<a href="#"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</a>' +
-                    '<a href="#"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
+                    '<a href="" class="edit-card" data-id="' + imgData.id + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</a>' +
+                    '<a href="" class="delete-card"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
                 '</div>' +
             '</div>';
 }
 
 function renderTags(tags) {
+    var listIndex = 0;
+    
+    $('.tag-list').empty().each(function() {
+        $(this).append(createTagHtml(tags, listIndex));
+        listIndex++;
+    })
+}
+
+function createTagHtml(tags, index) {
     var html = '';
     
     for (var i = 0; i < tags.length; i++) {
         html += '<li>' +
-                    '<input id="' + tags[i] + '" type="checkbox" class="checkbox" name="' + tags[i] + '">' +
-                    '<label class="check-label" for="' + tags[i] + '">' + tags[i] + '</label>' +
+                    '<input id="' + tags[i] + '-' + index + '" type="checkbox" class="checkbox" name="' + tags[i] + '">' +
+                    '<label class="check-label" for="' + tags[i] + '-' + index + '">' + tags[i] + '</label>' +
                 '</li>';
     }
     
-    $('#tag-list').empty().append(html);
+    return html;
 }
 
 function findKeywords(contains, tags, imageData) {

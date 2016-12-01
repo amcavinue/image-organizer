@@ -42,3 +42,7 @@ var runServer = function(callback) {
  app.get('/:imageId/edit', function(req, res) {
      res.sendFile(path.join(__dirname + '/public/edit.html'));
 });
+
+/*app.post('/:imageId/image', function(req, res) {
+     // Upload the image.
+});*/
