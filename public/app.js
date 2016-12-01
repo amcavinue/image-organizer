@@ -147,7 +147,7 @@ $(function() {
         dictDefaultMessage: 'Drop images here or click to upload.',
         init: function() {
             this.on("success", function(file, response) {
-                // TODO: Test/handle response, and place image in here.
+                // TODO: After backend implementation, test/handle response, and place image in here.
                 /*$('#img-description').text();
                 $('#img-modal').attr("src", 'images/' + );*/
                 // console.log(response);
@@ -217,7 +217,24 @@ $(function() {
     // Put listeners on all delete buttons.
     $('#main-cards').on('click', '.delete-card', function(e) {
         e.preventDefault();
-        // TODO: This.
+        var cardId = $(this).data('id');
+        var context = this;
+        // TODO: After backend implementation, remove image card from imageData object.
+        bootbox.confirm({ 
+            size: "small",
+            message: "Are you sure you want to delete this image?", 
+            buttons: {
+                confirm: {
+                    label: 'Yes',
+                    className: 'btn-danger'
+                }
+            },
+            callback: function(result){ 
+                if (result) {
+                    $(context).closest('.image-card').remove();
+                }
+            }
+        });
     });
     
     // Toggle the filters form.
@@ -299,7 +316,7 @@ function renderCard(imgData) {
                     '<span>' + imgData.description + '</span>' +
                     '<br />' +
                     '<a href="" class="edit-card" data-id="' + imgData.id + '"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span> Edit</a>' +
-                    '<a href="" class="delete-card"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
+                    '<a href="" class="delete-card" data-id="' + imgData.id + '"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Delete</a>' +
                 '</div>' +
             '</div>';
 }
