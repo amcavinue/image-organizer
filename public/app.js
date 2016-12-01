@@ -144,7 +144,14 @@ $(function() {
         url: "/", 
         acceptedFiles: 'image/*',
         uploadMultiple: false,
-        dictDefaultMessage: 'Drop images here or click here to upload.'
+        dictDefaultMessage: 'Drop images here or click here to upload.',
+        init: function() {
+            this.on("success", function(file, response) {
+                // console.log(response);
+            }).on("error", function(file, errorMessage) {
+                // console.log('There was an upload error');
+            });
+        }
     });
     
     // Put a modal listener on all the images.
