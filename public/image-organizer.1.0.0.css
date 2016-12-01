@@ -110,4 +110,8 @@ body {
 #modal-edit .image-figure #uploaded-image-name {
   font-weight: 700;
 }
+#modal-edit #image-description {
+  margin-bottom: 1em;
+  width: calc(100% - 150px);
+}
 /*# sourceMappingURL=image-organizer.1.0.0.css.map */
