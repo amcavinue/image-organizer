@@ -271,7 +271,7 @@ $(function() {
        results = results.concat(findTags(formTags, imageTagAssociative));
        
        // Remove duplicates from the results.
-       var results = results.filter(function(elem, index, self) {
+       results = results.filter(function(elem, index, self) {
            return index == self.indexOf(elem);
        });
 
@@ -327,7 +327,7 @@ function renderTags(tags) {
     $('.tag-list').empty().each(function() {
         $(this).append(createTagHtml(tags, listIndex));
         listIndex++;
-    })
+    });
 }
 
 function createTagHtml(tags, index) {
