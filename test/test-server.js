@@ -49,8 +49,10 @@ describe('Image organizer', function() {
     });
     
     after(function(done) {
+        Tag.findOneAndRemove({name: 'zyx'}).exec();
         Image.findOneAndRemove({name: 'zyx'}).exec();
-        Image.findOneAndRemove({name: 'wvu'}, function(error, doc, result) {
+        Image.findOneAndRemove({name: 'wvu'}).exec();
+        Image.findOneAndRemove({name: 'tsr'}, function(error, doc, result) {
             done();
         });
     });

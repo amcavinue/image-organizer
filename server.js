@@ -20,6 +20,10 @@ app.get('/images', function(req, res) {
     Image.find(true).populate('tags').then(function(docs) { res.json(docs); });
 });
 
+app.get('/images/:name', function(req, res) {
+   // Image.find({name: ''}) 
+});
+
 /*app.post('/:imageId/image', function(req, res) {
      // Upload the image.
 });*/
