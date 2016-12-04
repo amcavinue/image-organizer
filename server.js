@@ -21,7 +21,7 @@ app.get('/images', function(req, res) {
 });
 
 app.get('/images/:name', function(req, res) {
-   // Image.find({name: ''}) 
+   Image.find({name: req.params.name}).populate('tags').then(function(docs) { res.json(docs); });
 });
 
 /*app.post('/:imageId/image', function(req, res) {

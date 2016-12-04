@@ -36,7 +36,6 @@ describe('Image organizer', function() {
     });
     
     it('should return the images data with tags', function(done) {
-        // this.timeout(7000);
         chai.request(app)
             .get('/images')
             .end(function(err, res) {
@@ -44,6 +43,18 @@ describe('Image organizer', function() {
                 res.body.should.be.a('array');
                 res.body[res.body.length-1].should.be.a('object');
                 expect(res.body[res.body.length-1].tags).to.have.length.of(1);
+                done();
+            });
+    });
+    
+    it('should return data for a single image', function(done) {
+        chai.request(app)
+            .get('/images/tsr')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                expect(res.body[0].name).to.equal('tsr');
+                expect(res.body[0].tags).to.have.length.of(1);
                 done();
             });
     });
