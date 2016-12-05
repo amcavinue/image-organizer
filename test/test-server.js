@@ -73,14 +73,18 @@ describe('Image organizer', function() {
                         res.should.have.status(200);
                         res.body.should.be.a('array');
                         expect(res.body[0].name).to.equal('test-image.jpg');
+                        expect(fs.existsSync('./public/images/' + res.body[0].filename)).to.be.true;
                         done();
                     });
             });
     });
     
     after(function(done) {
+        // Delete the file.
         Tag.findOneAndRemove({name: 'zyx'}).exec();
-        Image.findOneAndRemove({name: 'test-image.jpg'}).exec();
+        Image.findOneAndRemove({name: 'test-image.jpg'}).exec(function(err, doc) {
+            fs.unlinkSync('./public/images/' + doc.filename);
+        });
         Image.findOneAndRemove({name: 'zyx'}).exec();
         Image.findOneAndRemove({name: 'wvu'}).exec();
         Image.findOneAndRemove({name: 'tsr'}, function(error, doc, result) {
