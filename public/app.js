@@ -141,7 +141,7 @@ $(function() {
     
     // Instantiate the dropzone.
     var newImageUploader = new Dropzone("#new-image-uploader", { 
-        url: "/", 
+        url: "/images", 
         acceptedFiles: 'image/*',
         uploadMultiple: false,
         dictDefaultMessage: 'Drop images here or click to upload.',
@@ -174,9 +174,10 @@ $(function() {
         $('#uploaded-image').attr("src", '');
         $('#image-description').val('');
         
+        // TODO: Update this.
         // Clear the dropzone and change the upload destination.
         newImageUploader.removeAllFiles();
-        newImageUploader.options.url = '/' + cardId + '/image';
+        // newImageUploader.options.url = '/' + cardId + '/image';
         
         // Uncheck all the checkboxes.
         $('#tag-list-edit input:checkbox').prop('checked', false);

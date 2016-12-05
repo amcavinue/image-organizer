@@ -3,6 +3,7 @@ global.DATABASE_URL = 'mongodb://localhost/image-organizer-test';
 var chai = require('chai');
 var chaiHttp = require('chai-http');
 var server = require('../server.js');
+var fs = require('fs');
 var Image = require('../models/image.js');
 var Tag = require('../models/tag.js');
 
@@ -59,8 +60,27 @@ describe('Image organizer', function() {
             });
     });
     
+    it('should upload an image file', function(done) {
+        chai.request(app)
+            .post('/images')
+            .set('Content-type', 'multipart/form-data')
+            .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
+            .end(function(err, res) {
+                res.should.have.status(201);
+                chai.request(app)
+                    .get('/images/test-image.jpg')
+                    .end(function(err, res) {
+                        res.should.have.status(200);
+                        res.body.should.be.a('array');
+                        expect(res.body[0].name).to.equal('test-image.jpg');
+                        done();
+                    });
+            });
+    });
+    
     after(function(done) {
         Tag.findOneAndRemove({name: 'zyx'}).exec();
+        Image.findOneAndRemove({name: 'test-image.jpg'}).exec();
         Image.findOneAndRemove({name: 'zyx'}).exec();
         Image.findOneAndRemove({name: 'wvu'}).exec();
         Image.findOneAndRemove({name: 'tsr'}, function(error, doc, result) {
