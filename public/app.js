@@ -211,8 +211,33 @@ $(function() {
     
     // Watch the edit form button.
     $('#edit-form').submit(function(e) {
-        e.preventDefault(); 
-        $('#modal-edit').modal('hide');
+        e.preventDefault();
+        var tags = [];
+        
+        // TODO: Check if this works. Add to new screen.
+        $('#tag-list-edit input:checkbox').each(function() {
+           if ($(this).prop('checked')) {
+               tags.push($(this).val);
+           }
+        });
+        
+        $.ajax({
+            method: '',
+            url: '',
+            dataType: '',
+            data: {
+                description: $('#image-description').val,
+                tags: tags
+            }
+        }).done(function(data) {
+            // TODO: Waiting screen
+            $('#modal-edit').modal('hide');
+        }).fail(function (jqXHR, error, errorThrown) {
+            bootbox.alert('There was an error saving your data. Please try again later.');
+            console.log(jqXHR);
+            console.log(error);
+            console.log(errorThrown);
+        });
     });
     
     // Put listeners on all delete buttons.
@@ -221,7 +246,7 @@ $(function() {
         var cardId = $(this).data('id');
         var context = this;
         // TODO: After backend implementation, remove image card from imageData object.
-        bootbox.confirm({ 
+        bootbox.alert({ 
             size: "small",
             message: "Are you sure you want to delete this image?", 
             buttons: {

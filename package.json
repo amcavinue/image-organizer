@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/amcavinue/image-organizer#readme",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "bootbox": "^4.4.0",
     "bootstrap": "^3.3.7",
     "chai": "^3.5.0",

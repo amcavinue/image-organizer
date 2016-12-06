@@ -20,8 +20,11 @@ describe('Image organizer', function() {
             Tag.create({name:'zyx'}, function(err, doc) {
                 var zyxId = doc._id;
                 
-                Image.create({name: 'zyx'}, {name: 'wvu'}, {name: 'tsr', tags:[zyxId]}, function() {
-                    done();
+                Image.create({name: 'zyx'}, {name: 'wvu'});
+                Image.create({name: 'tsr', tags:[zyxId]}, function(err, doc) {
+                    Tag.update({name: 'zyx'}, {images: [doc._id]}).exec(function(err, doc) {
+                        done();
+                    });
                 });
             });
         });
@@ -76,6 +79,26 @@ describe('Image organizer', function() {
                         expect(fs.existsSync('./public/images/' + res.body[0].filename)).to.be.true;
                         done();
                     });
+            });
+    });
+    
+    it('should update a single image data', function(done) {
+        chai.request(app)
+            .put('/images/tsr')
+            .send({ description: 'abc', tags: ['abc', 'def']})
+            .end(function(err, res) {
+                /*
+                    tsr image should not have reference to zyx tag.
+                    tsr image should have references to abc and def tags.
+                
+                    zyx tag should not have reference to tsr image.
+                    
+                    abc and def tags should have been created.
+                    abc tag should have reference to tsr image.
+                    def tag should have reference to tsr image.
+                */
+                
+                done();
             });
     });
     
