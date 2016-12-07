@@ -15,14 +15,17 @@ var app = server.app;
 chai.use(chaiHttp);
 
 describe('Image organizer', function() {
+    var ghiId, tsrId, abcId, defId;
+    
     before(function(done) {
         server.runServer(function() {
-            Tag.create({name:'zyx'}, function(err, doc) {
-                var zyxId = doc._id;
+            Tag.create({name:'ghi'}, function(err, doc) {
+                ghiId = doc._id;
                 
                 Image.create({name: 'zyx'}, {name: 'wvu'});
-                Image.create({name: 'tsr', tags:[zyxId]}, function(err, doc) {
-                    Tag.update({name: 'zyx'}, {images: [doc._id]}).exec(function(err, doc) {
+                Image.create({name: 'tsr', tags:[ghiId]}, function(err, doc) {
+                    Tag.update({name: 'ghi'}, {images: [doc._id]}).exec(function(err, doc) {
+                        tsrId = doc._id;
                         done();
                     });
                 });
@@ -83,36 +86,78 @@ describe('Image organizer', function() {
     });
     
     it('should update a single image data', function(done) {
+        this.timeout(7000);
         chai.request(app)
             .put('/images/tsr')
             .send({ description: 'abc', tags: ['abc', 'def']})
             .end(function(err, res) {
-                /*
-                    tsr image should not have reference to zyx tag.
-                    tsr image should have references to abc and def tags.
-                
-                    zyx tag should not have reference to tsr image.
-                    
-                    abc and def tags should have been created.
-                    abc tag should have reference to tsr image.
-                    def tag should have reference to tsr image.
-                */
-                
+                res.should.have.status(200);
+                expect(res.body.tags.indexOf('abc')).to.be.truthy;
+                expect(res.body.tags.indexOf('def')).to.be.truthy;
                 done();
             });
     });
     
+    describe('references should be changed after image update', function() {
+        it('ghi tag should not have reference to tsr image.', function(done) {
+            Tag.findOne({name: 'ghi'}, function(err, doc) {
+                if (doc.images.length) {
+                    doc.images.forEach(function(item, index) {
+                        expect(item.name).to.not.equal('tsr');
+                        done();
+                    });
+                } else {
+                    done();
+                }
+            });
+        });
+        
+        it('abc and def tags should have been created.', function(done) {
+            Tag.findOne({name: 'abc'}, function(err, doc) {
+                if (doc) {
+                    Tag.findOne({name: 'def'}, function(err, doc) {
+                        if (doc) {
+                            done();
+                        }
+                    });
+                }
+            });
+        });
+        
+        it('abc tag should have reference to tsr image.', function(done) {
+            Tag.findOne({name: 'abc'}, function(err, doc) {
+                var tsrIndex = doc.images.indexOf(tsrId);
+                if (tsrIndex) {
+                    done();
+                }
+            });
+        });
+        
+        it('def tag should have reference to tsr image.', function(done) {
+            Tag.findOne({name: 'def'}, function(err, doc) {
+                var tsrIndex = doc.images.indexOf(tsrId);
+                if (tsrIndex) {
+                    done();
+                }
+            });
+        });
+    });
+    
     after(function(done) {
-        Tag.findOneAndRemove({name: 'zyx'}).exec();
         Tag.findOneAndRemove({name: 'abc'}).exec();
         Tag.findOneAndRemove({name: 'def'}).exec();
-        Image.findOneAndRemove({name: 'test-image.jpg'}).exec(function(err, doc) {
-            // Delete the file.
-            fs.unlinkSync('./public/images/' + doc.filename);
-        });
+        Tag.findOneAndRemove({name: 'ghi'}).exec();
+        
         Image.findOneAndRemove({name: 'zyx'}).exec();
         Image.findOneAndRemove({name: 'wvu'}).exec();
-        Image.findOneAndRemove({name: 'tsr'}, function(error, doc, result) {
+        Image.findOneAndRemove({name: 'tsr'}).exec();
+        Image.findOneAndRemove({name: 'test-image.jpg'}).exec(function(err, doc) {
+            if (err) {
+                console.log(err);
+            }
+            // Delete the file. 
+            // *****Needs to happen last.*****
+            fs.unlinkSync('./public/images/' + doc.filename);
             done();
         });
     });
