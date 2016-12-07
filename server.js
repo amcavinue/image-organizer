@@ -40,7 +40,7 @@ app.get('/images/:name', function(req, res) {
     Image.find({name: req.params.name}).populate('tags').then(function(docs) { res.json(docs); });
 });
 
-// Upload the image.
+// Upload a new image.
 app.post('/images', uploads.single('imageField'), function(req, res) {
     Image.create({
         name: req.file.originalname,
@@ -55,100 +55,101 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
     });
 });
 
-app.put('/images/:name', function(req, res) {
-    function* update() {
-        var tags = [];
+// Update an existing image.
+app.put('/images/existing/:name', function(req, res) {
     
-        yield Tag.find(true).then(function(docs) {
-            // Get just the tagnames from the object.
-            for (var i = 0; i < docs.length; i++) {
-                tags.push(docs[i].name);
+});
+
+// Update image info and card info.
+app.put('/images/:name', function(req, res) {
+    Image.findOne({name: req.params.name}).populate('tags').exec(function(err, doc) {
+        function* updateImage() {
+            if (err) {
+                return res.status(400).json({
+                    message: 'Internal Server Error'
+                });
             }
-            updateI.next();
-        });
-        
-        yield Image.findOne({name: req.params.name}).populate('tags').exec(function(err, doc) {
-            function* updateImage() {
+            
+            doc.description = req.body.description;
+            
+            // Get just the names of the tags.
+            var imageTags = [];
+            for (var i = 0; i < doc.tags.length; i++) {
+                imageTags.push(doc.tags[i].name);
+            }
+            
+            // Determine what references need to be changed.
+            var removeRefs = _.difference(imageTags, req.body.tags);
+            var addRefs = _.difference(req.body.tags, imageTags);
+            
+            for (var i = 0; i < removeRefs.length; i++) {
+                // Remove the existing reference from the image doc.
+                var removeIndex = doc.tags.indexOf(removeRefs[i]);
+                doc.tags.splice(removeIndex, 1);
+                
+                // Remove the non-used image reference from the tag.
+                yield Tag.findOne({name: removeRefs[i]}, function(err, tagDoc) {
+                    var imageIndex = tagDoc.images.indexOf(doc._id);
+                    tagDoc.images.splice(imageIndex, 1);
+                    tagDoc.save(function(err) {
+                        if (err) {
+                            return res.status(400).json({
+                                message: 'Internal Server Error'
+                            });
+                        }
+                        updateImageIt.next();
+                    });
+                });
+            }
+            
+            yield addRefs.forEach(function(item, index) {
+                Tag.findOne({name: item}).then(function(tagDoc) {
+                    if (tagDoc === null) {
+                        // If the tag doesn't currently exist, create it.
+                        Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
+                            if (err) {
+                                console.log(err);
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            
+                            // Add the new tag reference to the image doc.
+                            // doc.tags.push(tagDoc2._id);
+                            doc.tags.push(tagDoc2);
+                            updateImageIt.next();
+                        });
+                    } else {
+                        // Add the new tag reference to the image doc.
+                        // doc.tags.push(tagDoc._id);
+                        doc.tags.push(tagDoc);
+                        updateImageIt.next();
+                    }
+                });
+            });
+            
+            // Remove unused tags from the DB.
+            yield Tag.find(true).then(function(docs) {
+               docs.forEach(function(item, index) {
+                   if (item.images.length === 0) {
+                       Tag.remove({name: item.name}).exec();
+                   }
+               });
+               updateImageIt.next();
+            });
+            
+            yield doc.save(function(err, docSaved, numAffected) {
                 if (err) {
                     return res.status(400).json({
                         message: 'Internal Server Error'
                     });
                 }
-                
-                doc.description = req.body.description;
-                
-                // Get just the names of the tags.
-                var imageTags = [];
-                for (var i = 0; i < doc.tags.length; i++) {
-                    imageTags.push(doc.tags[i].name);
-                }
-                
-                // Determine what references need to be changed.
-                var removeRefs = _.difference(imageTags, req.body.tags);
-                var addRefs = _.difference(req.body.tags, imageTags);
-                
-                for (var i = 0; i < removeRefs.length; i++) {
-                    // Remove the existing reference from the image doc.
-                    var removeIndex = doc.tags.indexOf(removeRefs[i]);
-                    doc.tags.splice(removeIndex, 1);
-                    
-                    // Remove the non-used image reference from the tag.
-                    yield Tag.findOne({name: removeRefs[i]}, function(err, tagDoc) {
-                        var imageIndex = tagDoc.images.indexOf(doc._id);
-                        tagDoc.images.splice(imageIndex, 1);
-                        tagDoc.save(function(err) {
-                            if (err) {
-                                console.log(103);
-                                return res.status(400).json({
-                                    message: 'Internal Server Error'
-                                });
-                            }
-                            updateImageIt.next();
-                        });
-                    });
-                }
-                
-                yield addRefs.forEach(function(item, index) {
-                    Tag.findOne({name: item}).then(function(tagDoc) {
-                        if (tagDoc === null) {
-                            // If the tag doesn't currently exist, create it.
-                            Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
-                                if (err) {
-                                    console.log(err);
-                                    return res.status(400).json({
-                                        message: 'Internal Server Error'
-                                    });
-                                }
-                                
-                                // Add the new tag reference to the image doc.
-                                // doc.tags.push(tagDoc2._id);
-                                doc.tags.push(tagDoc2);
-                                updateImageIt.next();
-                            });
-                        } else {
-                            // Add the new tag reference to the image doc.
-                            // doc.tags.push(tagDoc._id);
-                            doc.tags.push(tagDoc);
-                            updateImageIt.next();
-                        }
-                    });
-                });
-                
-                yield doc.save(function(err, docSaved, numAffected) {
-                    if (err) {
-                        return res.status(400).json({
-                            message: 'Internal Server Error'
-                        });
-                    }
-                    res.status(200).send(docSaved);
-                });
-            }
-            var updateImageIt = updateImage();
-            updateImageIt.next();
-        });
-    }
-    var updateI = update();
-    updateI.next();
+                res.status(200).send(docSaved);
+            });
+        }
+        var updateImageIt = updateImage();
+        updateImageIt.next();
+    });
 });
 
 /**

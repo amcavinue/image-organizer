@@ -92,23 +92,17 @@ describe('Image organizer', function() {
             .send({ description: 'abc', tags: ['abc', 'def']})
             .end(function(err, res) {
                 res.should.have.status(200);
-                expect(res.body.tags.indexOf('abc')).to.be.truthy;
-                expect(res.body.tags.indexOf('def')).to.be.truthy;
+                expect(res.body.tags.indexOf('abc')).to.be.ok;
+                expect(res.body.tags.indexOf('def')).to.be.ok;
                 done();
             });
     });
     
     describe('references should be changed after image update', function() {
-        it('ghi tag should not have reference to tsr image.', function(done) {
+        it('ghi tag should have been removed due to no references.', function(done) {
             Tag.findOne({name: 'ghi'}, function(err, doc) {
-                if (doc.images.length) {
-                    doc.images.forEach(function(item, index) {
-                        expect(item.name).to.not.equal('tsr');
-                        done();
-                    });
-                } else {
-                    done();
-                }
+                expect(doc).to.not.be.ok;
+                done();
             });
         });
         
