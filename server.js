@@ -55,9 +55,23 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
     });
 });
 
-// Update an existing image.
-app.put('/images/existing/:name', function(req, res) {
-    
+// Update/overwrite an existing image with a new one.
+app.put('/images/existing/:name', uploads.single('imageField'), function(req, res) {
+    Image.findOne({name: req.params.name}, function(err, doc) {
+        fs.unlinkSync('./public/images/' + doc.filename);
+        
+        doc.name = req.file.originalname;
+        doc.filename = req.file.filename;
+        
+        doc.save(function(err, item) {
+            if (err) {
+                return res.status(400).json({
+                    message: 'Internal Server Error'
+                });
+            }
+            res.status(204).end();
+        });
+    });
 });
 
 // Update image info and card info.
@@ -102,6 +116,7 @@ app.put('/images/:name', function(req, res) {
                 });
             }
             
+            // Update tag references and add new tags (if applicable).
             yield addRefs.forEach(function(item, index) {
                 Tag.findOne({name: item}).then(function(tagDoc) {
                     if (tagDoc === null) {
@@ -115,13 +130,11 @@ app.put('/images/:name', function(req, res) {
                             }
                             
                             // Add the new tag reference to the image doc.
-                            // doc.tags.push(tagDoc2._id);
                             doc.tags.push(tagDoc2);
                             updateImageIt.next();
                         });
                     } else {
                         // Add the new tag reference to the image doc.
-                        // doc.tags.push(tagDoc._id);
                         doc.tags.push(tagDoc);
                         updateImageIt.next();
                     }
@@ -138,6 +151,7 @@ app.put('/images/:name', function(req, res) {
                updateImageIt.next();
             });
             
+            // Save changes the the image doc.
             yield doc.save(function(err, docSaved, numAffected) {
                 if (err) {
                     return res.status(400).json({

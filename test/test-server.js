@@ -85,8 +85,18 @@ describe('Image organizer', function() {
             });
     });
     
+    it('should update an existing image with a new one', function(done) {
+        chai.request(app)
+            .put('/images/existing/test-image.jpg')
+            .set('Content-type', 'multipart/form-data')
+            .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
+            .end(function(err, res) {
+                res.should.have.status(204);
+                done();
+            });
+    });
+    
     it('should update a single image data', function(done) {
-        this.timeout(7000);
         chai.request(app)
             .put('/images/tsr')
             .send({ description: 'abc', tags: ['abc', 'def']})
