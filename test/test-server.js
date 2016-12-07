@@ -103,9 +103,11 @@ describe('Image organizer', function() {
     });
     
     after(function(done) {
-        // Delete the file.
         Tag.findOneAndRemove({name: 'zyx'}).exec();
+        Tag.findOneAndRemove({name: 'abc'}).exec();
+        Tag.findOneAndRemove({name: 'def'}).exec();
         Image.findOneAndRemove({name: 'test-image.jpg'}).exec(function(err, doc) {
+            // Delete the file.
             fs.unlinkSync('./public/images/' + doc.filename);
         });
         Image.findOneAndRemove({name: 'zyx'}).exec();

@@ -56,85 +56,93 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
 });
 
 app.put('/images/:name', function(req, res) {
-    // TODO: Wrap this in a generator.
-    var tags = [];
+    function* update() {
+        var tags = [];
     
-    Tag.find(true).then(function(docs) {
-        // Get just the tagnames from the object.
-        for (var i = 0; i < docs.length; i++) {
-            tags.push(docs[i].name);
-        }
-    });
-    
-    Image.findOne({name: req.params.name}).populate('tags').exec(function(err, doc) {
-        if (err) {
-            return res.status(400).json({
-                message: 'Internal Server Error'
-            });
-        }
-        
-        doc.description = req.body.description;
-        
-        // Get just the names of the tags.
-        var imageTags = [];
-        for (var i = 0; i < doc.tags.length; i++) {
-            imageTags.push(doc.tags[i].name);
-        }
-        
-        // Determine what references need to be changed.
-        var removeRefs = _.difference(imageTags, req.body.tags);
-        var addRefs = _.difference(req.body.tags, imageTags);
-        
-        console.log(addRefs, 88);
-        
-        for (var i = 0; i < removeRefs.length; i++) {
-            // Remove the existing reference from the image doc.
-            var removeIndex = doc.tags.indexOf(removeRefs[i]);
-            doc.tags = doc.tags.splice(removeIndex, 1);
-            
-            // Remove the non-used image reference from the tag.
-            Tag.findOne({name: removeRefs[i]}).then(function(tagDoc) {
-                var imageIndex = tagDoc.images.indexOf(doc._id)
-                tagDoc.image.splice(imageIndex, 1);
-                tagDoc.save();
-            });
-        }
-        
-        addRefs.forEach(function(item, index) {
-            Tag.findOne({name: item}).then(function(tagDoc) {
-                console.log(tagDoc, 103);
-                if (tagDoc === null) {
-                    console.log(item, index, 107);
-                    // If the tag doesn't currently exist, create it.
-                    Tag.create({name: item}, function(err, doc) {
-                        if (err) {
-                            console.log(err);
-                            return res.status(400).json({
-                                message: 'Internal Server Error'
-                            });
-                        }
-                        
-                        console.log(doc, 113);
-                        
-                        // Add the new tag reference to the image doc.
-                    });
-                } else {
-                    // Add the new tag reference to the image doc.
-                    console.log(122);
-                    // doc.tags.push(tagDoc._id);
-                }
-            });
+        yield Tag.find(true).then(function(docs) {
+            // Get just the tagnames from the object.
+            for (var i = 0; i < docs.length; i++) {
+                tags.push(docs[i].name);
+            }
+            updateI.next();
         });
         
-        doc.save(function(err) {
+        yield Image.findOne({name: req.params.name}).populate('tags').exec(function(err, doc) {
             if (err) {
                 return res.status(400).json({
                     message: 'Internal Server Error'
                 });
             }
-            res.status(204).end();
+            
+            doc.description = req.body.description;
+            
+            // Get just the names of the tags.
+            var imageTags = [];
+            for (var i = 0; i < doc.tags.length; i++) {
+                imageTags.push(doc.tags[i].name);
+            }
+            
+            // Determine what references need to be changed.
+            var removeRefs = _.difference(imageTags, req.body.tags);
+            var addRefs = _.difference(req.body.tags, imageTags);
+            
+            for (var i = 0; i < removeRefs.length; i++) {
+                // Remove the existing reference from the image doc.
+                var removeIndex = doc.tags.indexOf(removeRefs[i]);
+                doc.tags = doc.tags.splice(removeIndex, 1);
+                
+                // Remove the non-used image reference from the tag.
+                Tag.findOne({name: removeRefs[i]}).then(function(tagDoc) {
+                    var imageIndex = tagDoc.images.indexOf(doc._id)
+                    tagDoc.image.splice(imageIndex, 1);
+                    tagDoc.save();
+                });
+            }
+            
+            addRefs.forEach(function(item, index) {
+                Tag.findOne({name: item}).then(function(tagDoc) {
+                    if (tagDoc === null) {
+                        // If the tag doesn't currently exist, create it.
+                        Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
+                            if (err) {
+                                console.log(err);
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            
+                            // Add the new tag reference to the image doc.
+                            doc.tags.push(tagDoc2._id);
+                            
+                            doc.save(function(err) {
+                                if (err) {
+                                    return res.status(400).json({
+                                        message: 'Internal Server Error'
+                                    });
+                                }
+                                res.status(204).end();
+                            });
+                        });
+                    } else {
+                        // Add the new tag reference to the image doc.
+                        doc.tags.push(tagDoc._id);
+                        
+                        doc.save(function(err) {
+                            if (err) {
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            res.status(204).end();
+                        });
+                    }
+                });
+            });
         });
-    });
+    }
+    
+    var updateI = update();
+    updateI.next();
 });
 
 /**
