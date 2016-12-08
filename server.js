@@ -75,7 +75,7 @@ app.get('/images-tags', function(req, res) {
 });
 
 // Upload a new image.
-app.post('/images', uploads.single('imageField'), function(req, res) {
+app.post('/images', uploads.single('file'), function(req, res) {
     Image.create({
         name: req.file.originalname,
         filename: req.file.filename
@@ -90,7 +90,7 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
 });
 
 // Update/overwrite an existing image with a new one.
-app.put('/images/existing/:id', uploads.single('imageField'), function(req, res) {
+app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
     Image.findOne({_id: req.params.id}, function(err, doc) {
         fs.unlinkSync('./public/images/' + doc.filename);
         
@@ -112,6 +112,7 @@ app.put('/images/existing/:id', uploads.single('imageField'), function(req, res)
 app.put('/images/:id', function(req, res) {
     Image.findOne({_id: req.params.id}).populate('tags').exec(function(err, doc) {
         function* updateImage() {
+            debugger;
             if (err) {
                 return res.status(400).json({
                     message: 'Error while accessing MongoDB.'
@@ -150,43 +151,47 @@ app.put('/images/:id', function(req, res) {
                 });
             }
             
-            // Update tag references and add new tags (if applicable).
-            yield addRefs.forEach(function(item, index) {
-                Tag.findOne({name: item}).then(function(tagDoc) {
-                    if (tagDoc === null) {
-                        // If the tag doesn't currently exist, create it.
-                        Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
-                            if (err) {
-                                return res.status(400).json({
-                                    message: 'Error while creating document in MongoDB.'
-                                });
-                            }
-                            // Add the new tag reference to the image doc.
-                            doc.tags.push(tagDoc2);
-                            
-                            if (index === (addRefs.length - 1)) {
-                                updateImageIt.next();
-                            }
-                        });
-                    } else {
-                        // Add the tag reference to the image doc.
-                        tagDoc.images.push(doc);
-                        tagDoc.save(function(err, docSaved, numAffected) {
-                            if (err) {
-                                return res.status(400).json({
-                                    message: 'Error while saving document in MongoDB.'
-                                });
-                            }
-                            doc.tags.push(tagDoc);
-                            
-                            if (index === (addRefs.length - 1)) {
-                                updateImageIt.next();
-                            }
-                        });
-                    }
+            debugger;
+            if (addRefs.length !== 0) {
+                // Update tag references and add new tags (if applicable).
+                yield addRefs.forEach(function(item, index) {
+                    Tag.findOne({name: item}).then(function(tagDoc) {
+                        if (tagDoc === null) {
+                            // If the tag doesn't currently exist, create it.
+                            Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
+                                if (err) {
+                                    return res.status(400).json({
+                                        message: 'Error while creating document in MongoDB.'
+                                    });
+                                }
+                                // Add the new tag reference to the image doc.
+                                doc.tags.push(tagDoc2);
+                                
+                                if (index === (addRefs.length - 1)) {
+                                    updateImageIt.next();
+                                }
+                            });
+                        } else {
+                            // Add the tag reference to the image doc.
+                            tagDoc.images.push(doc);
+                            tagDoc.save(function(err, docSaved, numAffected) {
+                                if (err) {
+                                    return res.status(400).json({
+                                        message: 'Error while saving document in MongoDB.'
+                                    });
+                                }
+                                doc.tags.push(tagDoc);
+                                
+                                if (index === (addRefs.length - 1)) {
+                                    updateImageIt.next();
+                                }
+                            });
+                        }
+                    });
                 });
-            });
+            }
             
+            debugger;
             // Remove unused tags from the DB.
             yield Tag.find(true).then(function(docs) {
                docs.forEach(function(item, index) {

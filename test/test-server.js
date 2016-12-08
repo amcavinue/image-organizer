@@ -92,7 +92,7 @@ describe('Image organizer', function() {
         chai.request(app)
             .post('/images')
             .set('Content-type', 'multipart/form-data')
-            .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
+            .attach('file', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
                 res.should.have.status(201);
                 testImageId = res.body._id;
@@ -112,7 +112,7 @@ describe('Image organizer', function() {
         chai.request(app)
             .put('/images/existing/' + testImageId)
             .set('Content-type', 'multipart/form-data')
-            .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
+            .attach('file', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
                 res.should.have.status(204);
                 done();
