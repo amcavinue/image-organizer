@@ -82,7 +82,7 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
     }, function(err, item) {
         if (err) {
             return res.status(400).json({
-                message: 'Internal Server Error'
+                message: 'Error while uploading image to MongoDB.'
             });
         }
         res.status(201).json(item);
@@ -100,7 +100,7 @@ app.put('/images/existing/:name', uploads.single('imageField'), function(req, re
         doc.save(function(err, item) {
             if (err) {
                 return res.status(400).json({
-                    message: 'Internal Server Error'
+                    message: 'Error while saving document to MongoDB.'
                 });
             }
             res.status(204).end();
@@ -114,7 +114,7 @@ app.put('/images/:name', function(req, res) {
         function* updateImage() {
             if (err) {
                 return res.status(400).json({
-                    message: 'Internal Server Error'
+                    message: 'Error while accessing MongoDB.'
                 });
             }
             
@@ -142,7 +142,7 @@ app.put('/images/:name', function(req, res) {
                     tagDoc.save(function(err) {
                         if (err) {
                             return res.status(400).json({
-                                message: 'Internal Server Error'
+                                message: 'Error while saving document to MongoDB.'
                             });
                         }
                         updateImageIt.next();
@@ -158,7 +158,7 @@ app.put('/images/:name', function(req, res) {
                         Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
                             if (err) {
                                 return res.status(400).json({
-                                    message: 'Internal Server Error'
+                                    message: 'Error while creating document in MongoDB.'
                                 });
                             }
                             // Add the new tag reference to the image doc.
@@ -174,7 +174,7 @@ app.put('/images/:name', function(req, res) {
                         tagDoc.save(function(err, docSaved, numAffected) {
                             if (err) {
                                 return res.status(400).json({
-                                    message: 'Internal Server Error'
+                                    message: 'Error while saving document in MongoDB.'
                                 });
                             }
                             doc.tags.push(tagDoc);
@@ -201,7 +201,7 @@ app.put('/images/:name', function(req, res) {
             yield doc.save(function(err, docSaved, numAffected) {
                 if (err) {
                     return res.status(400).json({
-                        message: 'Internal Server Error'
+                        message: 'Error while saving document to MongoDB.'
                     });
                 }
                 res.status(200).send(docSaved);
@@ -218,7 +218,7 @@ app.delete('/images/:name', function(req, res) {
         function* deleteImage() {
             if (err) {
                 return res.status(400).json({
-                    message: 'Internal Server Error'
+                    message: 'Error while accessing MongoDB.'
                 });
             }
             
@@ -243,7 +243,7 @@ app.delete('/images/:name', function(req, res) {
                         Tag.remove({_id: tagItem._id}, function(err) {
                             if (err) {
                                 return res.status(400).json({
-                                    message: 'Internal Server Error'
+                                    message: 'Error while removing document from MongoDB.'
                                 });
                             }
                             
@@ -255,7 +255,7 @@ app.delete('/images/:name', function(req, res) {
                         tagItem.save(function(err, item, numAffected) {
                             if (err) {
                                 return res.status(400).json({
-                                    message: 'Internal Server Error'
+                                    message: 'Error while saving document to MongoDB.'
                                 });
                             }
                             
@@ -270,7 +270,7 @@ app.delete('/images/:name', function(req, res) {
             yield Image.remove({_id: doc._id}, function(err) {
                 if (err) {
                     return res.status(400).json({
-                        message: 'Internal Server Error'
+                        message: 'Error while removing document from MongoDB.'
                     });
                 }
                 deleteImageIt.next();
