@@ -123,20 +123,32 @@ app.put('/images/:name', function(req, res) {
                         // If the tag doesn't currently exist, create it.
                         Tag.create({name: item, images: [doc._id]}, function(err, tagDoc2) {
                             if (err) {
-                                console.log(err);
                                 return res.status(400).json({
                                     message: 'Internal Server Error'
                                 });
                             }
-                            
                             // Add the new tag reference to the image doc.
                             doc.tags.push(tagDoc2);
-                            updateImageIt.next();
+                            
+                            if (index === (addRefs.length - 1)) {
+                                updateImageIt.next();
+                            }
                         });
                     } else {
-                        // Add the new tag reference to the image doc.
-                        doc.tags.push(tagDoc);
-                        updateImageIt.next();
+                        // Add the tag reference to the image doc.
+                        tagDoc.images.push(doc);
+                        tagDoc.save(function(err, docSaved, numAffected) {
+                            if (err) {
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            doc.tags.push(tagDoc);
+                            
+                            if (index === (addRefs.length - 1)) {
+                                updateImageIt.next();
+                            }
+                        });
                     }
                 });
             });
@@ -163,6 +175,77 @@ app.put('/images/:name', function(req, res) {
         }
         var updateImageIt = updateImage();
         updateImageIt.next();
+    });
+});
+
+// Delete the image file and data.
+app.delete('/images/:name', function(req, res) {
+    Image.findOne({name: req.params.name}, function(err, doc) {
+        function* deleteImage() {
+            if (err) {
+                return res.status(400).json({
+                    message: 'Internal Server Error'
+                });
+            }
+            
+            fs.unlinkSync('./public/images/' + doc.filename);
+            
+            // Update tag references and remove unused tags.
+            yield Tag.find(true).then(function(tags) {
+                // Go through each tag and look for a reference to the image.
+                tags.forEach(function(tagItem, tagIndex) {
+                    var imageRefsRem = [];
+                    tagItem.images.forEach(function(imageItem, imageIndex) {
+                        if(String(imageItem) === String(doc._id)) {
+                            imageRefsRem.push(imageIndex)
+                        }
+                    });
+                    imageRefsRem.forEach(function(item, index) {
+                        tagItem.images.splice(item, 1);
+                    });
+                
+                    // Save all the tags or delete them if they have no more references.
+                    if(tagItem.images.length === 0) {
+                        Tag.remove({_id: tagItem._id}, function(err) {
+                            if (err) {
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            
+                            if (index === (tags.length - 1)) {
+                                deleteImageIt.next();
+                            }
+                        });
+                    } else {
+                        tagItem.save(function(err, item, numAffected) {
+                            if (err) {
+                                return res.status(400).json({
+                                    message: 'Internal Server Error'
+                                });
+                            }
+                            
+                            if (tagIndex === (tags.length - 1)) {
+                                deleteImageIt.next();
+                            }
+                        });
+                    }
+                });
+            });
+            
+            yield Image.remove({_id: doc._id}, function(err) {
+                if (err) {
+                    return res.status(400).json({
+                        message: 'Internal Server Error'
+                    });
+                }
+                deleteImageIt.next();
+            });
+            
+            yield res.status(204).end();
+        }
+        var deleteImageIt = deleteImage();
+        deleteImageIt.next();
     });
 });
 

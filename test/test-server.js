@@ -15,7 +15,7 @@ var app = server.app;
 chai.use(chaiHttp);
 
 describe('Image organizer', function() {
-    var ghiId, tsrId, abcId, defId;
+    var ghiId, tsrId, abcId, defId, testImageId;
     
     before(function(done) {
         server.runServer(function() {
@@ -96,6 +96,19 @@ describe('Image organizer', function() {
             });
     });
     
+    it('should update the data for the test-image.jpg', function(done) {
+        chai.request(app)
+            .put('/images/test-image.jpg')
+            .send({ tags: ['abc', 'def']})
+            .end(function(err, res) {
+                testImageId = res.body._id;
+                res.should.have.status(200);
+                expect(res.body.tags.indexOf('abc')).to.be.ok;
+                expect(res.body.tags.indexOf('def')).to.be.ok;
+                done();
+            });
+    });
+    
     it('should update a single image data', function(done) {
         chai.request(app)
             .put('/images/tsr')
@@ -147,6 +160,28 @@ describe('Image organizer', function() {
         });
     });
     
+    it('should delete an image and its data', function(done) {
+        chai.request(app)
+            .delete('/images/test-image.jpg')
+            .end(function(err, res) {
+                res.should.have.status(204);
+                
+                // abc and def tags should not have references to test-image.jpg. 
+                Tag.findOne({name: 'abc'}, function(err, doc) {
+                    doc.images.forEach(function(item, index) {
+                        expect(String(item)).to.not.equal(testImageId);
+                    });
+                });
+                
+                Tag.findOne({name: 'def'}, function(err, doc) {
+                    doc.images.forEach(function(item, index) {
+                        expect(String(item)).to.not.equal(testImageId);
+                    });
+                    done();
+                });
+            });
+    });
+    
     after(function(done) {
         Tag.findOneAndRemove({name: 'abc'}).exec();
         Tag.findOneAndRemove({name: 'def'}).exec();
@@ -154,14 +189,10 @@ describe('Image organizer', function() {
         
         Image.findOneAndRemove({name: 'zyx'}).exec();
         Image.findOneAndRemove({name: 'wvu'}).exec();
-        Image.findOneAndRemove({name: 'tsr'}).exec();
-        Image.findOneAndRemove({name: 'test-image.jpg'}).exec(function(err, doc) {
+        Image.findOneAndRemove({name: 'tsr'}).exec(function(err, doc) {
             if (err) {
                 console.log(err);
             }
-            // Delete the file. 
-            // *****Needs to happen last.*****
-            fs.unlinkSync('./public/images/' + doc.filename);
             done();
         });
     });
