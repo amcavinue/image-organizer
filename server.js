@@ -40,6 +40,40 @@ app.get('/images/:name', function(req, res) {
     Image.find({name: req.params.name}).populate('tags').then(function(docs) { res.json(docs); });
 });
 
+app.get('/tags', function(req, res) {
+    Tag.find(true).then(function(docs) {
+        var tags = [];
+        docs.forEach(function(item, index) {
+            tags.push(item.name);
+        });
+        res.json(tags);
+    });
+});
+
+app.get('/images-tags', function(req, res) {
+    Image.find(true).populate('tags').then(function(docs) {
+        var images = [];
+        docs.forEach(function(imageItem, imageIndex) {
+            if (imageItem.tags.length === 0) {
+                images.push({
+                    imageId: imageItem._id,
+                    imageName: imageItem.name,
+                    tag: null
+                });
+            } else {
+                imageItem.tags.forEach(function(tagItem, tagIndex) {
+                    images.push({
+                        imageId: imageItem._id,
+                        imageName: imageItem.name,
+                        tag: tagItem.name
+                    });
+                });
+            }
+        });
+        res.json(images);
+    });
+});
+
 // Upload a new image.
 app.post('/images', uploads.single('imageField'), function(req, res) {
     Image.create({

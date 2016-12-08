@@ -66,6 +66,28 @@ describe('Image organizer', function() {
             });
     });
     
+    it('should return an array of tags', function(done) {
+        chai.request(app)
+            .get('/tags')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                expect(res.body[0]).to.be.a('string');
+                done();
+            });
+    });
+    
+    it('should return an array of image objects with a single tag each', function(done) {
+        chai.request(app)
+            .get('/images-tags')
+            .end(function(err, res) {
+                res.should.have.status(200);
+                res.body.should.be.a('array');
+                expect(res.body[0]).to.be.a('object');
+                done();
+            });
+    });
+    
     it('should upload an image file', function(done) {
         chai.request(app)
             .post('/images')
