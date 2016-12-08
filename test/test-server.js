@@ -24,8 +24,8 @@ describe('Image organizer', function() {
                 
                 Image.create({name: 'zyx'}, {name: 'wvu'});
                 Image.create({name: 'tsr', tags:[ghiId]}, function(err, doc) {
+                    tsrId = doc._id;
                     Tag.update({name: 'ghi'}, {images: [doc._id]}).exec(function(err, doc) {
-                        tsrId = doc._id;
                         done();
                     });
                 });
@@ -56,7 +56,7 @@ describe('Image organizer', function() {
     
     it('should return data for a single image', function(done) {
         chai.request(app)
-            .get('/images/tsr')
+            .get('/images/' + tsrId)
             .end(function(err, res) {
                 res.should.have.status(200);
                 res.body.should.be.a('array');
@@ -95,8 +95,9 @@ describe('Image organizer', function() {
             .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
                 res.should.have.status(201);
+                testImageId = res.body._id;
                 chai.request(app)
-                    .get('/images/test-image.jpg')
+                    .get('/images/' + testImageId)
                     .end(function(err, res) {
                         res.should.have.status(200);
                         res.body.should.be.a('array');
@@ -109,7 +110,7 @@ describe('Image organizer', function() {
     
     it('should update an existing image with a new one', function(done) {
         chai.request(app)
-            .put('/images/existing/test-image.jpg')
+            .put('/images/existing/' + testImageId)
             .set('Content-type', 'multipart/form-data')
             .attach('imageField', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
@@ -120,10 +121,9 @@ describe('Image organizer', function() {
     
     it('should update the data for the test-image.jpg', function(done) {
         chai.request(app)
-            .put('/images/test-image.jpg')
+            .put('/images/' + testImageId)
             .send({ tags: ['abc', 'def']})
             .end(function(err, res) {
-                testImageId = res.body._id;
                 res.should.have.status(200);
                 expect(res.body.tags.indexOf('abc')).to.be.ok;
                 expect(res.body.tags.indexOf('def')).to.be.ok;
@@ -133,7 +133,7 @@ describe('Image organizer', function() {
     
     it('should update a single image data', function(done) {
         chai.request(app)
-            .put('/images/tsr')
+            .put('/images/' + tsrId)
             .send({ description: 'abc', tags: ['abc', 'def']})
             .end(function(err, res) {
                 res.should.have.status(200);
@@ -166,7 +166,7 @@ describe('Image organizer', function() {
         it('abc tag should have reference to tsr image.', function(done) {
             Tag.findOne({name: 'abc'}, function(err, doc) {
                 var tsrIndex = doc.images.indexOf(tsrId);
-                if (tsrIndex) {
+                if (tsrIndex === 0 || tsrIndex) {
                     done();
                 }
             });
@@ -175,7 +175,7 @@ describe('Image organizer', function() {
         it('def tag should have reference to tsr image.', function(done) {
             Tag.findOne({name: 'def'}, function(err, doc) {
                 var tsrIndex = doc.images.indexOf(tsrId);
-                if (tsrIndex) {
+                if (tsrIndex === 0 || tsrIndex) {
                     done();
                 }
             });
@@ -184,7 +184,7 @@ describe('Image organizer', function() {
     
     it('should delete an image and its data', function(done) {
         chai.request(app)
-            .delete('/images/test-image.jpg')
+            .delete('/images/' + testImageId)
             .end(function(err, res) {
                 res.should.have.status(204);
                 

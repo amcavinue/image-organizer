@@ -36,8 +36,8 @@ app.get('/images', function(req, res) {
     Image.find(true).populate('tags').then(function(docs) { res.json(docs); });
 });
 
-app.get('/images/:name', function(req, res) {
-    Image.find({name: req.params.name}).populate('tags').then(function(docs) { res.json(docs); });
+app.get('/images/:id', function(req, res) {
+    Image.find({_id: req.params.id}).populate('tags').then(function(doc) { res.json(doc); });
 });
 
 app.get('/tags', function(req, res) {
@@ -90,8 +90,8 @@ app.post('/images', uploads.single('imageField'), function(req, res) {
 });
 
 // Update/overwrite an existing image with a new one.
-app.put('/images/existing/:name', uploads.single('imageField'), function(req, res) {
-    Image.findOne({name: req.params.name}, function(err, doc) {
+app.put('/images/existing/:id', uploads.single('imageField'), function(req, res) {
+    Image.findOne({_id: req.params.id}, function(err, doc) {
         fs.unlinkSync('./public/images/' + doc.filename);
         
         doc.name = req.file.originalname;
@@ -109,8 +109,8 @@ app.put('/images/existing/:name', uploads.single('imageField'), function(req, re
 });
 
 // Update image info and card info.
-app.put('/images/:name', function(req, res) {
-    Image.findOne({name: req.params.name}).populate('tags').exec(function(err, doc) {
+app.put('/images/:id', function(req, res) {
+    Image.findOne({_id: req.params.id}).populate('tags').exec(function(err, doc) {
         function* updateImage() {
             if (err) {
                 return res.status(400).json({
@@ -213,8 +213,8 @@ app.put('/images/:name', function(req, res) {
 });
 
 // Delete the image file and data.
-app.delete('/images/:name', function(req, res) {
-    Image.findOne({name: req.params.name}, function(err, doc) {
+app.delete('/images/:id', function(req, res) {
+    Image.findOne({_id: req.params.id}, function(err, doc) {
         function* deleteImage() {
             if (err) {
                 return res.status(400).json({
