@@ -231,8 +231,6 @@ app.delete('/images/:id', function(req, res) {
                 });
             }
             
-            debugger;
-            
             if (req.body.rollback) {
                 // Delete the newly uploaded, but unused file.
                 fs.unlinkSync('./public/images/' + doc.filename);
@@ -265,7 +263,6 @@ app.delete('/images/:id', function(req, res) {
             
                 // Update tag references and remove unused tags.
                 yield Tag.find(true).then(function(tags) {
-                    debugger;
                     if (tags.length !== 0) {
                         // Go through each tag and look for a reference to the image.
                         tags.forEach(function(tagItem, tagIndex) {

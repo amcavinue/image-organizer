@@ -100,7 +100,6 @@ describe('Image organizer', function() {
                     .get('/images/' + testImageId)
                     .end(function(err, res) {
                         prevFilename = res.body[0].filename;
-                        console.log(prevFilename, 103);
                         res.should.have.status(200);
                         res.body.should.be.a('array');
                         expect(res.body[0].name).to.equal('test-image.jpg');

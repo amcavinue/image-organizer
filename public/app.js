@@ -302,7 +302,6 @@ $(function() {
         
         // Watch the edit form button.
         $('#edit-form').submit(function(e) {
-            debugger;
             e.preventDefault();
             var editTags = [];
 
@@ -315,7 +314,6 @@ $(function() {
             $.LoadingOverlay('show');
             
             if(isEditCard) {
-                debugger;
                 // If it's editing an existing card.
                 $.ajax({
                     method: 'PUT',
@@ -355,7 +353,6 @@ $(function() {
             } else {
                 // If it's adding a new card.
                 if (isUploaded) {
-                    debugger;
                     $.ajax({
                         method: 'PUT',
                         url: '/images/' + $('#image-description').data('id'),
@@ -394,7 +391,6 @@ $(function() {
                         console.log(errorThrown);*/
                     });
                 } else {
-                    debugger;
                     $.LoadingOverlay('hide');
                     bootbox.alert('You must upload an image.');
                 }
@@ -403,9 +399,7 @@ $(function() {
         
         // Put listener on edit/new image cancel button.
         $('#edit-form-cancel').click(function(e) {
-            debugger;
-            if (newImage || (prevFile && isUploaded)) {
-                debugger;
+            if (isUploaded) {
                 $.LoadingOverlay('show');
                 
                 $.ajax({
@@ -432,7 +426,6 @@ $(function() {
                     console.log(errorThrown);*/
                 });
             } else {
-                debugger;
                 $('#modal-edit').modal('hide');
             }
         });
