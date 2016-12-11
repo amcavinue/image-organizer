@@ -112,9 +112,10 @@ describe('Image organizer', function() {
         chai.request(app)
             .put('/images/existing/' + testImageId)
             .set('Content-type', 'multipart/form-data')
+            .send({ deletePrev: true })
             .attach('file', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
-                res.should.have.status(204);
+                res.should.have.status(200);
                 done();
             });
     });

@@ -64,7 +64,6 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     <h4 class="modal-title" id="modal-edit-name"></h4>
                 </div>
                 <div class="modal-body">
@@ -86,12 +85,14 @@
                               <label for="tag-list-edit">Tags</label>
                               <div class="tag-list-container">
                                     <ul class="tag-list" id="tag-list-edit"></ul>
+                                    <label for="tag-list-new">New Tag</label>
+                                    <input type="text" name="tag-list-new" id="tag-list-new" placeholder="Add tag and hit enter." />
                               </div>
                           </div>
                         </fieldset>
                         <div class="modal-footer">
                             <input class="btn btn-primary" type="submit" value="Submit" name="submit" />
-                            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            <button id="edit-form-cancel" type="button" class="btn btn-default">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -105,6 +106,7 @@
 <script type="text/javascript" src="/scripts/underscore/underscore-min.js"></script>
 <script type="text/javascript" src="/scripts/dropzone/dist/min/dropzone.min.js"></script>
 <script type="text/javascript" src="/scripts/bootbox/bootbox.min.js"></script>
+<script type="text/javascript" src="/scripts/gasparesganga-jquery-loading-overlay/src/loadingoverlay.min.js"></script>
 <script type="text/javascript" src="app.js"></script>
 </body>
 </html>

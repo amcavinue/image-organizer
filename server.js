@@ -92,8 +92,6 @@ app.post('/images', uploads.single('file'), function(req, res) {
 // Update/overwrite an existing image with a new one.
 app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
     Image.findOne({_id: req.params.id}, function(err, doc) {
-        fs.unlinkSync('./public/images/' + doc.filename);
-        
         doc.name = req.file.originalname;
         doc.filename = req.file.filename;
         
@@ -103,7 +101,7 @@ app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
                     message: 'Error while saving document to MongoDB.'
                 });
             }
-            res.status(204).end();
+            res.status(200).json(item);
         });
     });
 });
@@ -112,7 +110,6 @@ app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
 app.put('/images/:id', function(req, res) {
     Image.findOne({_id: req.params.id}).populate('tags').exec(function(err, doc) {
         function* updateImage() {
-            debugger;
             if (err) {
                 return res.status(400).json({
                     message: 'Error while accessing MongoDB.'
@@ -133,7 +130,11 @@ app.put('/images/:id', function(req, res) {
             
             for (var i = 0; i < removeRefs.length; i++) {
                 // Remove the existing reference from the image doc.
-                var removeIndex = doc.tags.indexOf(removeRefs[i]);
+                var imageObj = doc.tags.find(function(tag) {
+                    return tag.name === removeRefs[i];
+                });
+                
+                var removeIndex = doc.tags.indexOf(imageObj);
                 doc.tags.splice(removeIndex, 1);
                 
                 // Remove the non-used image reference from the tag.
@@ -151,7 +152,6 @@ app.put('/images/:id', function(req, res) {
                 });
             }
             
-            debugger;
             if (addRefs.length !== 0) {
                 // Update tag references and add new tags (if applicable).
                 yield addRefs.forEach(function(item, index) {
@@ -166,7 +166,6 @@ app.put('/images/:id', function(req, res) {
                                 }
                                 // Add the new tag reference to the image doc.
                                 doc.tags.push(tagDoc2);
-                                
                                 if (index === (addRefs.length - 1)) {
                                     updateImageIt.next();
                                 }
@@ -174,33 +173,38 @@ app.put('/images/:id', function(req, res) {
                         } else {
                             // Add the tag reference to the image doc.
                             tagDoc.images.push(doc);
+                            doc.tags.push(tagDoc);
                             tagDoc.save(function(err, docSaved, numAffected) {
                                 if (err) {
                                     return res.status(400).json({
                                         message: 'Error while saving document in MongoDB.'
                                     });
                                 }
-                                doc.tags.push(tagDoc);
-                                
-                                if (index === (addRefs.length - 1)) {
-                                    updateImageIt.next();
-                                }
                             });
+                            if (index === (addRefs.length - 1)) {
+                                updateImageIt.next();
+                            }
                         }
                     });
                 });
             }
             
-            debugger;
             // Remove unused tags from the DB.
-            yield Tag.find(true).then(function(docs) {
-               docs.forEach(function(item, index) {
-                   if (item.images.length === 0) {
-                       Tag.remove({name: item.name}).exec();
-                   }
-               });
-               updateImageIt.next();
+            yield Tag.find(true, function(err, docs) {
+                if (docs) {
+                    docs.forEach(function(item, index) {
+                        if (item.images.length === 0) {
+                            Tag.remove({name: item.name}).exec();
+                        }
+                    });
+                }
+                updateImageIt.next();
             });
+            
+            // Delete old image.
+            if (req.body.deletePrev) {
+                fs.unlinkSync('./public/images/' + req.body.prevFilename);
+            }
             
             // Save changes the the image doc.
             yield doc.save(function(err, docSaved, numAffected) {
@@ -227,60 +231,96 @@ app.delete('/images/:id', function(req, res) {
                 });
             }
             
-            fs.unlinkSync('./public/images/' + doc.filename);
+            debugger;
             
-            // Update tag references and remove unused tags.
-            yield Tag.find(true).then(function(tags) {
-                // Go through each tag and look for a reference to the image.
-                tags.forEach(function(tagItem, tagIndex) {
-                    var imageRefsRem = [];
-                    tagItem.images.forEach(function(imageItem, imageIndex) {
-                        if(String(imageItem) === String(doc._id)) {
-                            imageRefsRem.push(imageIndex)
-                        }
-                    });
-                    imageRefsRem.forEach(function(item, index) {
-                        tagItem.images.splice(item, 1);
-                    });
+            if (req.body.rollback) {
+                // Delete the newly uploaded, but unused file.
+                fs.unlinkSync('./public/images/' + doc.filename);
                 
-                    // Save all the tags or delete them if they have no more references.
-                    if(tagItem.images.length === 0) {
-                        Tag.remove({_id: tagItem._id}, function(err) {
-                            if (err) {
-                                return res.status(400).json({
-                                    message: 'Error while removing document from MongoDB.'
+                // Update the document with the old image name & filename.
+                doc.filename = req.body.prevFilename;
+                doc.name = req.body.prevName;
+                
+                if (req.body.newImage) {
+                    yield Image.remove({_id: req.params.id}, function(err) {
+                        if (err) {
+                            return res.status(400).json({
+                                message: 'Error while removing document from MongoDB.'
+                            });
+                        }
+                        deleteImageIt.next();
+                    });
+                } else {
+                    yield doc.save(function(err, item, numAffected) {
+                        if (err) {
+                            return res.status(400).json({
+                                message: 'Error while saving document to MongoDB.'
+                            });
+                        }
+                        deleteImageIt.next();
+                    });
+                }
+            } else {
+                fs.unlinkSync('./public/images/' + doc.filename);
+            
+                // Update tag references and remove unused tags.
+                yield Tag.find(true).then(function(tags) {
+                    debugger;
+                    if (tags.length !== 0) {
+                        // Go through each tag and look for a reference to the image.
+                        tags.forEach(function(tagItem, tagIndex) {
+                            var imageRefsRem = [];
+                            tagItem.images.forEach(function(imageItem, imageIndex) {
+                                if(String(imageItem) === String(doc._id)) {
+                                    imageRefsRem.push(imageIndex)
+                                }
+                            });
+                            imageRefsRem.forEach(function(item, index) {
+                                tagItem.images.splice(item, 1);
+                            });
+                        
+                            // Save all the tags or delete them if they have no more references.
+                            if(tagItem.images.length === 0) {
+                                Tag.remove({_id: tagItem._id}, function(err) {
+                                    if (err) {
+                                        return res.status(400).json({
+                                            message: 'Error while removing document from MongoDB.'
+                                        });
+                                    }
+                                    
+                                    if (tagIndex === (tags.length - 1)) {
+                                        deleteImageIt.next();
+                                    }
                                 });
-                            }
-                            
-                            if (index === (tags.length - 1)) {
-                                deleteImageIt.next();
+                            } else {
+                                tagItem.save(function(err, item, numAffected) {
+                                    if (err) {
+                                        return res.status(400).json({
+                                            message: 'Error while saving document to MongoDB.'
+                                        });
+                                    }
+                                    
+                                    if (tagIndex === (tags.length - 1)) {
+                                        deleteImageIt.next();
+                                    }
+                                });
                             }
                         });
                     } else {
-                        tagItem.save(function(err, item, numAffected) {
-                            if (err) {
-                                return res.status(400).json({
-                                    message: 'Error while saving document to MongoDB.'
-                                });
-                            }
-                            
-                            if (tagIndex === (tags.length - 1)) {
-                                deleteImageIt.next();
-                            }
-                        });
+                        deleteImageIt.next();
                     }
                 });
-            });
-            
-            yield Image.remove({_id: doc._id}, function(err) {
-                if (err) {
-                    return res.status(400).json({
-                        message: 'Error while removing document from MongoDB.'
-                    });
-                }
-                deleteImageIt.next();
-            });
-            
+                
+                yield Image.remove({_id: doc._id}, function(err) {
+                    if (err) {
+                        return res.status(400).json({
+                            message: 'Error while removing document from MongoDB.'
+                        });
+                    }
+                    deleteImageIt.next();
+                });
+            }
+
             yield res.status(204).end();
         }
         var deleteImageIt = deleteImage();
