@@ -15,7 +15,7 @@ var app = server.app;
 chai.use(chaiHttp);
 
 describe('Image organizer', function() {
-    var ghiId, tsrId, abcId, defId, testImageId;
+    var ghiId, tsrId, abcId, defId, testImageId, prevFilename;
     
     before(function(done) {
         server.runServer(function() {
@@ -99,6 +99,8 @@ describe('Image organizer', function() {
                 chai.request(app)
                     .get('/images/' + testImageId)
                     .end(function(err, res) {
+                        prevFilename = res.body[0].filename;
+                        console.log(prevFilename, 103);
                         res.should.have.status(200);
                         res.body.should.be.a('array');
                         expect(res.body[0].name).to.equal('test-image.jpg');
@@ -112,7 +114,6 @@ describe('Image organizer', function() {
         chai.request(app)
             .put('/images/existing/' + testImageId)
             .set('Content-type', 'multipart/form-data')
-            .send({ deletePrev: true })
             .attach('file', fs.readFileSync('./test/test-image.jpg'), './test/test-image.jpg')
             .end(function(err, res) {
                 res.should.have.status(200);
@@ -123,7 +124,7 @@ describe('Image organizer', function() {
     it('should update the data for the test-image.jpg', function(done) {
         chai.request(app)
             .put('/images/' + testImageId)
-            .send({ tags: ['abc', 'def']})
+            .send({ tags: ['abc', 'def'], deletePrev: true, prevFilename: prevFilename })
             .end(function(err, res) {
                 res.should.have.status(200);
                 expect(res.body.tags.indexOf('abc')).to.be.ok;
