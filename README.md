@@ -33,7 +33,7 @@ The tag system for this project required a many-to-many relationship between the
 
 ### Development Roadmap
 This is version 1.0.0 of the app. There are things that can be changed in the future that I'd like to do:
- - Front End
+- Front End
     - Scalability modules:
         - Pagination
         - Lazy Loading
