@@ -4,12 +4,12 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "npm run change-permissions && node server.js",
     "change-permissions": "chmod 777 public/images",
     "test": "mocha",
     "build:css": "npm run clean:css && lessc --source-map public/less/index.less public/$npm_package_name.$npm_package_version.css",
     "watch:css": "npm run build:css && chokidar 'public/less/*.less' -c 'npm run build:css'",
-    "clean:css": "rm -f public/$npm_package_name.$npm_package_version.css public/$npm_package_name.$npm_package_version.css.map"
+    "clean:css": "rm -f public/$npm_package_name.$npm_package_version.css public/$npm_package_name.$npm_package_version.css.map",
+    "postinstall": "npm run change-permissions"
   },
   "repository": {
     "type": "git",
