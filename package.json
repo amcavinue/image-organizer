@@ -4,6 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
+    "start": "run change-permissions && node server.js",
+    "change-permissions": "chmod 777 public/images",
     "test": "mocha",
     "build:css": "npm run clean:css && lessc --source-map public/less/index.less public/$npm_package_name.$npm_package_version.css",
     "watch:css": "npm run build:css && chokidar 'public/less/*.less' -c 'npm run build:css'",
