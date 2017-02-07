@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/amcavinue/image-organizer#readme",
   "dependencies": {
+    "aws-sdk": "^2.9.0",
     "body-parser": "^1.15.2",
     "bootbox": "^4.4.0",
     "bootstrap": "^3.3.7",
