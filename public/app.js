@@ -85,7 +85,7 @@ function renderCard(imgData) {
                 '<div class="card-container" data-id="' + imgData._id + '">' +
                     '<div class="img-container" data-filename="' + imgData.filename + '" data-name="' + imgData.name + '" data-description="' + imgData.description + '">' +
                         '<span class="img-helper"></span>' +
-                        '<img src="images/' + imgData.filename + '"></img>' +
+                        '<img src="http://aaronmcavinue.com/image-organizer/' + imgData.filename + '"></img>' +
                     '</div>' +
                     '<br />' +
                     '<span>' + imgData.description + '</span>' +
@@ -99,7 +99,7 @@ function renderCard(imgData) {
 function updateCard(imgData) {
     return '<div class="img-container" data-filename="' + imgData.filename + '" data-name="' + imgData.name + '" data-description="' + imgData.description + '">' +
                     '<span class="img-helper"></span>' +
-                    '<img src="images/' + imgData.filename + '"></img>' +
+                    '<img src="http://aaronmcavinue.com/image-organizer/' + imgData.filename + '"></img>' +
                 '</div>' +
                 '<br />' +
                 '<span>' + imgData.description + '</span>' +
@@ -206,7 +206,7 @@ $(function() {
                 }).on("success", function(file, response) {
                     isUploaded = true;
                     $('#uploaded-image-name').text(response.name);
-                    $('#uploaded-image').attr("src", 'images/' + response.filename);
+                    $('#uploaded-image').attr("src", 'http://aaronmcavinue.com/image-organizer/' + response.filename);
                     $('#image-description').data('id', response._id);
                     $.LoadingOverlay('hide');
                 }).on("error", function(file, errorMessage) {
@@ -220,7 +220,7 @@ $(function() {
         $('#main-cards').on('click', '.img-container', function() {
             $('#img-title').text($(this).data('name'));
             $('#img-description').text($(this).data('description'));
-            $('#img-modal').attr("src", 'images/' + $(this).data('filename'));
+            $('#img-modal').attr("src", 'http://aaronmcavinue.com/image-organizer/' + $(this).data('filename'));
             $('#modal-image').modal('show');
         });
         
@@ -262,7 +262,7 @@ $(function() {
             
             $('#modal-edit-name').text('Edit ' + currImage.name);
             $('#uploaded-image-name').text(currImage.name);
-            $('#uploaded-image').attr("src", 'images/' + currImage.filename);
+            $('#uploaded-image').attr("src", 'http://aaronmcavinue.com/image-organizer/' + currImage.filename);
             $('#image-description').val(currImage.description);
             $('#image-description').data('id', currImage._id);
             
