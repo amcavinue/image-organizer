@@ -5,7 +5,6 @@ var express = require('express');
 var util = require('util');
 var mongoose = require('mongoose');
 var path = require('path');
-var config = require('./config');
 var fs = require('fs');
 var multer = require('multer');
 var uuid = require('uuid');
@@ -13,11 +12,22 @@ var bodyParser = require('body-parser');
 var _ = require('underscore');
 var Image = require('./models/image.js');
 var Tag = require('./models/tag.js');
+const aws = require('aws-sdk');
+const https = require('https');
+const fileUpload = require("express-fileupload");
+const s3 = require('s3');
+const multerS3 = require('multer-s3');
+const Upload = require('s3-uploader');
+const JSFtp = require('jsftp');
+const Client = require('ftp');
+
+var config = require('./config');
 
 var app = express();
 app.use(express.static('public'));  // Serve the public folder.
 app.use('/scripts', express.static(__dirname + '/node_modules/')); // Serve the node_modules folder.
 app.use(bodyParser.json()); // Used for getting parameters in post requests.
+// app.use(fileUpload());
 
 // The destination and filenames for uploads.
 var storage = multer.diskStorage({ 
@@ -28,6 +38,14 @@ var storage = multer.diskStorage({
     }
 });
 var uploads = multer({ storage: storage });
+
+var ftpClient = new Client();
+var credentials = {
+    host: process.env.FTP_HOST,
+    user: process.env.FTP_USER,
+    password: process.env.FTP_PASSWORD
+}
+ftpClient.connect(credentials);
 
 /**
  * Routes
@@ -85,7 +103,19 @@ app.post('/images', uploads.single('file'), function(req, res) {
                 message: 'Error while uploading image to MongoDB.'
             });
         }
-        res.status(201).json(item);
+        
+        ftpClient.put('./public/images/' + item.filename,
+        'image-organizer/' + item.filename,
+        function(err) {
+            if (err) {
+                console.log(err, 65);
+                return res.status(400).json({
+                    message: 'Error while uploading image to server.'
+                });
+            }
+            console.log('uploaded');
+            return res.status(201).json(item);
+        });
     });
 });
 
@@ -101,7 +131,19 @@ app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
                     message: 'Error while saving document to MongoDB.'
                 });
             }
-            res.status(200).json(item);
+            
+            ftpClient.put('./public/images/' + item.filename,
+            'image-organizer/' + item.filename,
+            function(err) {
+                if (err) {
+                    console.log(err, 65);
+                    return res.status(400).json({
+                        message: 'Error while uploading image to server.'
+                    });
+                }
+                console.log('uploaded');
+                return res.status(200).json(item);
+            });
         });
     });
 });
@@ -202,9 +244,9 @@ app.put('/images/:id', function(req, res) {
             });
             
             // Delete old image.
-            if (req.body.deletePrev) {
+            /*if (req.body.deletePrev) {
                 fs.unlinkSync('./public/images/' + req.body.prevFilename);
-            }
+            }*/
             
             // Save changes the the image doc.
             yield doc.save(function(err, docSaved, numAffected) {
@@ -259,7 +301,7 @@ app.delete('/images/:id', function(req, res) {
                     });
                 }
             } else {
-                fs.unlinkSync('./public/images/' + doc.filename);
+                // fs.unlinkSync('./public/images/' + doc.filename);
             
                 // Update tag references and remove unused tags.
                 yield Tag.find(true).then(function(tags) {

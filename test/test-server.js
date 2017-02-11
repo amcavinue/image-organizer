@@ -46,6 +46,7 @@ describe('Image organizer', function() {
         chai.request(app)
             .get('/images')
             .end(function(err, res) {
+                console.log(res.body, 49);
                 res.should.have.status(200);
                 res.body.should.be.a('array');
                 res.body[res.body.length-1].should.be.a('object');
@@ -89,6 +90,7 @@ describe('Image organizer', function() {
     });
     
     it('should upload an image file', function(done) {
+        this.timeout(4000);
         chai.request(app)
             .post('/images')
             .set('Content-type', 'multipart/form-data')
@@ -110,6 +112,7 @@ describe('Image organizer', function() {
     });
     
     it('should update an existing image with a new one', function(done) {
+        this.timeout(4000);
         chai.request(app)
             .put('/images/existing/' + testImageId)
             .set('Content-type', 'multipart/form-data')

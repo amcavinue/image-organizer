@@ -15,3 +15,5 @@ deploy:
   app: still-temple-63836
   on:
     repo: amcavinue/image-organizer
+env:
+  matrix:
