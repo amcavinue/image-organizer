@@ -39,13 +39,11 @@ var storage = multer.diskStorage({
 });
 var uploads = multer({ storage: storage });
 
-var ftpClient = new Client();
 var credentials = {
     host: process.env.FTP_HOST,
     user: process.env.FTP_USER,
     password: process.env.FTP_PASSWORD
 }
-ftpClient.connect(credentials);
 
 /**
  * Routes
@@ -104,17 +102,23 @@ app.post('/images', uploads.single('file'), function(req, res) {
             });
         }
         
-        ftpClient.put('./public/images/' + item.filename,
-        'image-organizer/' + item.filename,
-        function(err) {
-            if (err) {
-                console.log(err, 65);
-                return res.status(400).json({
-                    message: 'Error while uploading image to server.'
-                });
-            }
-            console.log('uploaded');
-            return res.status(201).json(item);
+        var ftpClient = new Client();
+        ftpClient.connect(credentials);
+        ftpClient.on('ready', function() {
+           ftpClient.put('./public/images/' + item.filename,
+            'image-organizer/' + item.filename,
+            function(err) {
+                if (err) {
+                    console.log(err, 65);
+                    return res.status(400).json({
+                        message: 'Error while uploading image to server.'
+                    });
+                }
+                console.log('uploaded');
+                ftpClient.end();
+                ftpClient.destroy();
+                return res.status(201).json(item);
+            }); 
         });
     });
 });
@@ -132,17 +136,23 @@ app.put('/images/existing/:id', uploads.single('file'), function(req, res) {
                 });
             }
             
-            ftpClient.put('./public/images/' + item.filename,
-            'image-organizer/' + item.filename,
-            function(err) {
-                if (err) {
-                    console.log(err, 65);
-                    return res.status(400).json({
-                        message: 'Error while uploading image to server.'
-                    });
-                }
-                console.log('uploaded');
-                return res.status(200).json(item);
+            var ftpClient = new Client();
+            ftpClient.connect(credentials);
+            ftpClient.on('ready', function() {
+               ftpClient.put('./public/images/' + item.filename,
+                'image-organizer/' + item.filename,
+                function(err) {
+                    if (err) {
+                        console.log(err, 65);
+                        return res.status(400).json({
+                            message: 'Error while uploading image to server.'
+                        });
+                    }
+                    console.log('uploaded');
+                    ftpClient.end();
+                    ftpClient.destroy();
+                    return res.status(200).json(item);
+                }); 
             });
         });
     });
